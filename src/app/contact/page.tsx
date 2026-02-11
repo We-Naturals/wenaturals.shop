@@ -44,13 +44,13 @@ export default function ContactPage() {
                             <div>
                                 <h3 className="text-2xl font-bold mb-6">Direct Channels</h3>
                                 <div className="space-y-4">
-                                    <a href={`mailto:${contactContent.email || 'hello@wenaturals.com'}`} className="flex items-center gap-4 p-6 glass rounded-2xl hover:bg-white/5 transition-all group">
+                                    <a href={`mailto:${contactContent.email || 'customercare@wenaturals.shop'}`} className="flex items-center gap-4 p-6 glass rounded-2xl hover:bg-white/5 transition-all group">
                                         <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                                             <Mail className="w-6 h-6" />
                                         </div>
                                         <div className="min-w-0">
                                             <div className="text-xs uppercase tracking-widest text-zinc-500 mb-1">Email Us</div>
-                                            <div className="font-bold text-base md:text-lg break-all">{contactContent.email || 'hello@wenaturals.com'}</div>
+                                            <div className="font-bold text-base md:text-lg break-all">{contactContent.email || 'customercare@wenaturals.shop'}</div>
                                         </div>
                                     </a>
                                     <div className="flex items-center gap-4 p-6 glass rounded-2xl">

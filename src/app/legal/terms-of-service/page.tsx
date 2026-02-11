@@ -19,7 +19,7 @@ export default function TermsOfService() {
 
                     <h2>1. Introduction</h2>
                     <p>
-                        These Website Standard Terms and Conditions written on this webpage shall manage your use of our website, We Naturals accessible at wenaturals.com.
+                        These Website Standard Terms and Conditions written on this webpage shall manage your use of our website, We Naturals accessible at wenaturals.shop.
                     </p>
 
                     <h2>2. Intellectual Property Rights</h2>

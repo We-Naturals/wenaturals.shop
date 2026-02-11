@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
 
                     <hr />
                     <p className="text-sm text-zinc-500">
-                        If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:privacy@wenaturals.com">privacy@wenaturals.com</a>.
+                        If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:customercare@wenaturals.shop">customercare@wenaturals.shop</a>.
                     </p>
                 </>
             )}
