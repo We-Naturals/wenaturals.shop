@@ -1,0 +1,27 @@
+No worries! I'll clarify exactly what needs to be done.
+
+The feature we just built (creating an admin user directly) is a "Super Admin" capability. It requires a special key from Supabase that allows us to bypass the usual security rules—so we can create a user without logging out of your current account.
+
+Here is the step-by-step guide to fix it:
+
+1. Find Your Secret Key
+Go to your Supabase Dashboard (supabase.com).
+Open your project (We Naturals).
+Click on Settings (Gear icon at the bottom left) -> API.
+Look for the section Project API keys.
+You will see two keys: anon (public) and service_role (secret).
+Copy the service_role key. (It usually starts with ey... and says "secret").
+2. Add it to Your Project
+Open the file named 
+.env.local
+ in your project folder (I can see you already have this file).
+Add a new line at the bottom and paste the key you copied:
+env
+SUPABASE_SERVICE_ROLE_KEY=eyJhGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (paste your actual key here)
+3. Restart Your Server
+Since we changed the environment variables, you must restart the server for it to take effect:
+
+Go to your terminal where npm run dev is running.
+Press Ctrl + C to stop it.
+Run npm run dev again.
+Once you do this, the "Grant Access" form in /admin/settings will work like magic!

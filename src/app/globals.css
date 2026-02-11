@@ -1,0 +1,439 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-outfit), var(--font-geist-sans), sans-serif;
+  --font-heading: var(--font-outfit), sans-serif;
+  --font-serif: var(--font-cormorant), serif;
+
+  /* Fluid Typography System (Deity Grade) */
+  --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 2rem);
+  --font-size-3xl: clamp(2rem, 1.8rem + 1vw, 3rem);
+  --font-size-4xl: clamp(2.5rem, 2.2rem + 1.5vw, 4rem);
+  --font-size-display: clamp(3rem, 2.5rem + 4vw, 8rem);
+
+  /* Concentric Spacing System (Geometric Progression) */
+  --spacing-atomic: 0.25rem;
+  --spacing-inner: clamp(1rem, 0.8rem + 1vw, 2rem);
+  --spacing-outer: clamp(2rem, 1.5rem + 2.5vw, 5rem);
+  --spacing-section: clamp(4rem, 3rem + 5vw, 10rem);
+
+  /* Premium Glass Tokens */
+  --glass-blur: 16px;
+  --glass-blur-heavy: 40px;
+  --glass-border-width: 1px;
+  --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.1);
+  --shadow-premium-hover: 0 30px 70px rgba(0, 0, 0, 0.2);
+
+  /* Dynamic Design System Overrides */
+  --color-blue-500: var(--primary);
+  --color-blue-600: color-mix(in srgb, var(--primary), black 10%);
+  --color-blue-400: color-mix(in srgb, var(--primary), white 10%);
+
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  --border-glass: 1px solid rgba(255, 255, 255, 0.18);
+
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes aurora-1 {
+    0% {
+      transform: translate(-10%, -10%) scale(1) rotate(0deg);
+      opacity: 0.3;
+    }
+
+    50% {
+      transform: translate(10%, 5%) scale(1.2) rotate(10deg);
+      opacity: 0.5;
+    }
+
+    100% {
+      transform: translate(-5%, 15%) scale(1) rotate(0deg);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes aurora-2 {
+    0% {
+      transform: translate(10%, 10%) scale(1.2) rotate(0deg);
+      opacity: 0.2;
+    }
+
+    50% {
+      transform: translate(-15%, -10%) scale(1) rotate(-15deg);
+      opacity: 0.4;
+    }
+
+    100% {
+      transform: translate(5%, -5%) scale(1.2) rotate(0deg);
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes aurora-3 {
+    0% {
+      transform: translate(-5%, 15%) scale(1) rotate(0deg);
+      opacity: 0.3;
+    }
+
+    50% {
+      transform: translate(10%, -10%) scale(1.1) rotate(15deg);
+      opacity: 0.5;
+    }
+
+    100% {
+      transform: translate(-10%, 5%) scale(1) rotate(0deg);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes grain {
+
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+
+    10% {
+      transform: translate(-1%, -1%);
+    }
+
+    20% {
+      transform: translate(1%, 1%);
+    }
+
+    30% {
+      transform: translate(-2%, 0%);
+    }
+
+    40% {
+      transform: translate(2%, -1%);
+    }
+
+    50% {
+      transform: translate(-1%, 2%);
+    }
+
+    60% {
+      transform: translate(1%, -2%);
+    }
+
+    70% {
+      transform: translate(-2%, 1%);
+    }
+
+    80% {
+      transform: translate(2%, 2%);
+    }
+
+    90% {
+      transform: translate(-1%, -2%);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  --animate-shimmer: shimmer 2s infinite linear;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #050505;
+  --glass-bg: rgba(0, 0, 0, 0.05);
+  /* Darker glass for light mode */
+  --glass-border: rgba(0, 0, 0, 10%);
+  --accent-primary: var(--primary, #3b82f6);
+  --accent-secondary: #8b5cf6;
+  --radius: 1rem;
+}
+
+.dark {
+  --background: #050505;
+  --foreground: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-opacity: 0.05;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  overflow-x: hidden;
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s, color 0.3s;
+  letter-spacing: -0.01em;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border-width) solid var(--glass-border);
+  border-radius: var(--radius);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-morphism {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  box-shadow: var(--shadow-premium);
+  border: var(--glass-border-width) solid var(--glass-border);
+  border-radius: var(--radius);
+}
+
+/* Stunning Gradient Backgrounds */
+.bg-mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.15) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0, transparent 50%);
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.dark .bg-mesh {
+  background-color: #050505;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0, transparent 40%),
+    radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.12) 0, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0, transparent 40%),
+    radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0, transparent 60%),
+    /* Deep Space Particles */
+    radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 80px 80px;
+  animation: bg-drift 60s linear infinite;
+}
+
+@keyframes bg-drift {
+  from {
+    background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+
+  to {
+    background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 80px 80px;
+  }
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #18181b 0%, #3f3f46 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #18181b; /* Fallback */
+}
+
+.dark .text-gradient {
+  background: white;
+  /* Fallback */
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: background 0.3s;
+  border: 4px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.2);
+  background-clip: padding-box;
+}
+
+/* Fluid Scroll Container Utility */
+.scroll-container {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Global Form Elements Fix */
+select {
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+option {
+  background-color: #1a1a1a !important;
+  /* Force dark background for options */
+  color: #ffffff !important;
+  /* Force light text for options */
+}
+
+/* Ensure native focus/active states don't break visibility */
+select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+/* Explicit Typography Overrides for Tiptap & Storefront */
+.prose {
+  max-width: none !important;
+}
+
+.prose h1 {
+  display: block !important;
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1.5rem !important;
+  color: var(--foreground) !important;
+  letter-spacing: -0.05em !important;
+}
+
+.prose h2 {
+  display: block !important;
+  font-size: 1.875rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 1.25rem !important;
+  color: var(--foreground) !important;
+  letter-spacing: -0.03em !important;
+}
+
+.prose h3 {
+  display: block !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1rem !important;
+  color: var(--foreground) !important;
+}
+
+.prose p {
+  margin-bottom: 1.5rem !important;
+  line-height: 1.75 !important;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--accent-primary) !important;
+  background: rgba(59, 130, 246, 0.05) !important;
+  padding: 1rem 1.5rem !important;
+  font-style: italic !important;
+  margin-bottom: 1.5rem !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+}
+
+.prose video {
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* =========================================
+   GLOBAL AURA SYSTEM (The Glow)
+   ========================================= */
+
+/* 1. Text & Link Glow */
+a:hover,
+button:hover {
+  text-shadow: 0 0 10px var(--accent-primary),
+    0 0 20px rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* 2. Icon Glow (SVGs) */
+svg:hover {
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
+  transition: all 0.3s ease;
+}
+
+/* 3. Card & Glass Glow */
+.glass:hover,
+.glass-morphism:hover {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.15),
+    0 0 10px rgba(255, 255, 255, 0.05),
+    inset 0 0 20px rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 4. Image Bloom */
+img:hover {
+  filter: brightness(1.1) drop-shadow(0 0 15px rgba(59, 130, 246, 0.2));
+  transition: all 0.4s ease;
+}
+
+/* 5. Selection Glow */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  color: white;
+}
