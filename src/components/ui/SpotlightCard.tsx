@@ -4,6 +4,8 @@ import { useMotionTemplate, useMotionValue, motion, useSpring } from "framer-mot
 import { MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 
+import { useEnvironment } from "@/components/providers/EnvironmentalProvider";
+
 interface SpotlightCardProps {
     children: React.ReactNode;
     className?: string;
@@ -11,6 +13,9 @@ interface SpotlightCardProps {
 }
 
 export function SpotlightCard({ children, className, disableTilt = false }: SpotlightCardProps) {
+    const { performance } = useEnvironment();
+    const isTiltEnabled = !disableTilt && performance.tilt_enabled && !performance.eco_mode;
+
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
     const rotateX = useSpring(0, { damping: 20, stiffness: 150 });
@@ -25,7 +30,7 @@ export function SpotlightCard({ children, className, disableTilt = false }: Spot
         mouseX.set(x);
         mouseY.set(y);
 
-        if (!disableTilt) {
+        if (isTiltEnabled) {
             // Calculate rotation (max 10 degrees)
             const rx = ((y / height) - 0.5) * -10;
             const ry = ((x / width) - 0.5) * 10;
@@ -36,7 +41,7 @@ export function SpotlightCard({ children, className, disableTilt = false }: Spot
     }
 
     function handleMouseLeave() {
-        if (!disableTilt) {
+        if (isTiltEnabled) {
             rotateX.set(0);
             rotateY.set(0);
         }

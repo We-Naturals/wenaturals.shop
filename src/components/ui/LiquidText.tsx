@@ -9,7 +9,12 @@ interface LiquidTextProps {
     delay?: number;
 }
 
+import { useEnvironment } from "@/components/providers/EnvironmentalProvider";
+
 export function LiquidText({ text, className = "", delay = 0 }: LiquidTextProps) {
+    const { performance, theme } = useEnvironment();
+    const isAnimationEnabled = !performance.eco_mode && theme.animationIntensity > 0;
+
     const words = text.split(" ");
     const isGradient = className.includes("text-gradient");
     const parentClassName = cn(
@@ -55,7 +60,7 @@ export function LiquidText({ text, className = "", delay = 0 }: LiquidTextProps)
         <motion.div
             className={parentClassName}
             variants={container}
-            initial="hidden"
+            initial={isAnimationEnabled ? "hidden" : "visible"}
             animate="visible"
         >
             {words.map((word, index) => (

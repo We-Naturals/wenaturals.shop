@@ -27,17 +27,7 @@ export function ProductFilterBar({ categories, activeCategory, onCategoryChange,
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 {/* Categories */}
                 <div className="flex flex-nowrap overflow-x-auto pb-2 -mb-2 md:pb-0 md:mb-0 md:flex-wrap gap-2 no-scrollbar scroll-smooth">
-                    <button
-                        onClick={() => onCategoryChange("All")}
-                        className={cn(
-                            "px-4 py-2 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap",
-                            activeCategory === "All"
-                                ? "bg-white text-black"
-                                : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-transparent dark:border-white/5"
-                        )}
-                    >
-                        All Rituals
-                    </button>
+
                     {categories.map((cat) => (
                         <button
                             key={cat}

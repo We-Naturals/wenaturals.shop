@@ -9,6 +9,7 @@ import { Philosophy } from "@/components/home/Philosophy";
 import { CategorySpotlight } from "@/components/home/CategorySpotlight";
 import { RitualJournal } from "@/components/home/RitualJournal";
 import { createClient } from "@/lib/supabase-server";
+import { ClientRituals } from "@/components/home/ClientRituals";
 import { FeaturedCollection } from "@/components/home/FeaturedCollection";
 import { YoutubeShorts } from "@/components/home/YoutubeShorts";
 import { getSiteConfig, getAllProducts } from "@/lib/content-server";

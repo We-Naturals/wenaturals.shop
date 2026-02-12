@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useSensory } from "@/components/providers/SensoryProvider";
+import { useEnvironment } from "@/components/providers/EnvironmentalProvider";
 import { ExplodedViewModal } from "./ExplodedViewModal";
 import Link from "next/link";
 import { PrefetchLink } from "@/components/ui/PrefetchLink";
@@ -58,6 +59,9 @@ export function ProductCard({
 }: ProductCardProps) {
     const { addItem, toggleCart, triggerFly } = useCart();
     const { playChime } = useSensory();
+    const { performance, theme } = useEnvironment();
+    const isAnimationEnabled = !performance.eco_mode && theme.animationIntensity > 0;
+
     const [isExplodedOpen, setIsExplodedOpen] = useState(false);
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [isSelfHovered, setIsSelfHovered] = useState(false);
@@ -70,7 +74,7 @@ export function ProductCard({
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
+        if (!cardRef.current || !performance.tilt_enabled || performance.eco_mode) return;
         const rect = cardRef.current.getBoundingClientRect();
 
         // Tilt Safety: Avoid division by zero or NaN (Hardening Phase)
@@ -81,7 +85,7 @@ export function ProductCard({
         setMousePos({ x, y });
 
         // Holographic Tilt Logic (Phase 6.2)
-        const tiltIntensity = 15;
+        const tiltIntensity = 15 * theme.animationIntensity;
         const tiltX = (x / rect.width - 0.5) * tiltIntensity;
         const tiltY = (y / rect.height - 0.5) * -tiltIntensity;
 
@@ -92,7 +96,7 @@ export function ProductCard({
     };
 
     const handleAddToCart = (e?: React.MouseEvent) => {
-        if (e) {
+        if (e && isAnimationEnabled) {
             triggerFly(e.clientX, e.clientY, image);
         }
         addItem({ id, name, price, image });
@@ -124,31 +128,33 @@ export function ProductCard({
                     onMouseMove={handleMouseMove}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
-                    initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+                    initial={isAnimationEnabled ? { opacity: 0, y: 40, filter: "blur(10px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 1.2 / Math.max(0.1, theme.animationIntensity), ease: [0.16, 1, 0.3, 1] }}
                     className="relative"
                 >
                     {/* Bio-Luminescent "Essence" Layer (Batch 9.1 & 10.2) */}
-                    <motion.div
-                        className="absolute -inset-8 pointer-events-none z-0 rounded-[2rem]"
-                        animate={{
-                            opacity: isSelfHovered
-                                ? (0.4 * (alchemyConfig?.intensity ?? 1))
-                                : (alchemyConfig?.glow || isPeerHovered ? [0.05 * (alchemyConfig?.intensity ?? 1), 0.15 * (alchemyConfig?.intensity ?? 1), 0.05 * (alchemyConfig?.intensity ?? 1)] : 0),
-                            scale: isSelfHovered ? 1.1 : (isPeerHovered || alchemyConfig?.glow ? [1, 1.05, 1] : 1),
-                            filter: isSelfHovered ? 'blur(40px)' : 'blur(60px)',
-                        }}
-                        transition={{
-                            opacity: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
-                            scale: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
-                        }}
-                        style={{
-                            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.2) 30%, transparent 70%)',
-                            mixBlendMode: 'screen'
-                        }}
-                    />
+                    {isAnimationEnabled && (
+                        <motion.div
+                            className="absolute -inset-8 pointer-events-none z-0 rounded-[2rem]"
+                            animate={{
+                                opacity: isSelfHovered
+                                    ? (0.4 * (alchemyConfig?.intensity ?? 1))
+                                    : (alchemyConfig?.glow || isPeerHovered ? [0.05 * (alchemyConfig?.intensity ?? 1), 0.15 * (alchemyConfig?.intensity ?? 1), 0.05 * (alchemyConfig?.intensity ?? 1)] : 0),
+                                scale: isSelfHovered ? 1.1 : (isPeerHovered || alchemyConfig?.glow ? [1, 1.05, 1] : 1),
+                                filter: isSelfHovered ? 'blur(40px)' : 'blur(60px)',
+                            }}
+                            transition={{
+                                opacity: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
+                                scale: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
+                            }}
+                            style={{
+                                background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.2) 30%, transparent 70%)',
+                                mixBlendMode: 'screen'
+                            }}
+                        />
+                    )}
 
                     <SpotlightCard
                         disableTilt

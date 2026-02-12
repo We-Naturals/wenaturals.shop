@@ -17,7 +17,8 @@ import { AlchemicalSurface } from "@/components/ui/AlchemicalSurface";
 import { useEnvironment } from "@/components/providers/EnvironmentalProvider";
 
 export function Hero(props: { initialContent?: any }) {
-    const { performance } = useEnvironment();
+    const { performance, theme } = useEnvironment();
+    const isAnimationEnabled = !performance.eco_mode && theme.animationIntensity > 0;
     const searchParams = useSearchParams();
     const isAdminPreview = searchParams.get('admin_preview') === 'true';
 
@@ -110,9 +111,9 @@ export function Hero(props: { initialContent?: any }) {
                     {/* Floating "New Arrival" Pill */}
                     {hero.top_pill_visible !== false && (
                         <motion.div
-                            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                            initial={isAnimationEnabled ? { opacity: 0, y: 20, filter: "blur(10px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
                             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                            transition={{ delay: 0.5, duration: 0.8 }}
+                            transition={{ delay: isAnimationEnabled ? 0.5 : 0, duration: 0.8 }}
                             className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md shadow-sm"
                         >
                             <Sparkles className="w-3 h-3 text-yellow-500 dark:text-yellow-300 animate-pulse" />
@@ -135,9 +136,9 @@ export function Hero(props: { initialContent?: any }) {
 
                     {hero.subtext_visible !== false && (
                         <motion.p
-                            initial={{ opacity: 0, x: -10, filter: "blur(10px)" }}
+                            initial={isAnimationEnabled ? { opacity: 0, x: -10, filter: "blur(10px)" } : { opacity: 1, x: 0, filter: "blur(0px)" }}
                             animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                            transition={{ delay: 1, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ delay: isAnimationEnabled ? 1 : 0, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                             className="text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed mb-8 md:mb-10 border-l-2 border-blue-500/30 dark:border-blue-400/20 pl-6"
                             style={{ fontSize: 'var(--font-size-lg)' }}
                         >
@@ -146,9 +147,9 @@ export function Hero(props: { initialContent?: any }) {
                     )}
 
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={isAnimationEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1.2, duration: 0.8 }}
+                        transition={{ delay: isAnimationEnabled ? 1.2 : 0, duration: 0.8 }}
                         className="flex flex-wrap gap-4"
                     >
                         {hero.cta_primary_visible !== false && (
@@ -189,7 +190,8 @@ function ViewportAwareTilt({ media, hero }: { media: any[], hero: any }) {
     const isInView = useInView(ref, { margin: "0px 0px -20% 0px" });
     const gsapRef = useRef<any>(null);
 
-    const { performance } = useEnvironment();
+    const { performance, theme } = useEnvironment();
+    const isAnimationEnabled = !performance.eco_mode && theme.animationIntensity > 0;
 
     useEffect(() => {
         if (isInView && !gsapRef.current && performance?.tilt_enabled !== false) {
@@ -243,8 +245,8 @@ function ViewportAwareTilt({ media, hero }: { media: any[], hero: any }) {
             {hero.purity_visible !== false && (
                 <motion.div
                     className="absolute top-[10%] -right-2 lg:-right-12 z-20 translate-z-20 scale-75 md:scale-100"
-                    animate={{ y: [0, -15, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    animate={isAnimationEnabled ? { y: [0, -15, 0] } : { y: 0 }}
+                    transition={isAnimationEnabled ? { duration: 4, repeat: Infinity, ease: "easeInOut" } : {}}
                 >
                     <GlassCard className="p-3 md:p-4 backdrop-blur-xl border-zinc-200 dark:border-white/10 shadow-xl bg-white/80 dark:bg-white/5">
                         <div className="flex items-center gap-2 md:gap-3">
@@ -263,8 +265,8 @@ function ViewportAwareTilt({ media, hero }: { media: any[], hero: any }) {
             {hero.result_visible !== false && (
                 <motion.div
                     className="absolute bottom-[20%] -left-2 lg:-left-12 z-20 translate-z-10 scale-75 md:scale-100"
-                    animate={{ y: [0, 20, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    animate={isAnimationEnabled ? { y: [0, 20, 0] } : { y: 0 }}
+                    transition={isAnimationEnabled ? { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } : {}}
                 >
                     <GlassCard className="p-3 md:p-4 backdrop-blur-xl border-zinc-200 dark:border-white/10 shadow-xl bg-white/80 dark:bg-white/5">
                         <div className="flex items-center gap-2 md:gap-3">

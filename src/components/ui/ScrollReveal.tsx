@@ -3,6 +3,8 @@
 import { motion, useInView, Variants } from "framer-motion";
 import { useRef, ReactNode } from "react";
 
+import { useEnvironment } from "@/components/providers/EnvironmentalProvider";
+
 interface ScrollRevealProps {
     children: ReactNode;
     className?: string;
@@ -20,6 +22,9 @@ export function ScrollReveal({
     distance = 40,
     duration = 0.8
 }: ScrollRevealProps) {
+    const { performance, theme } = useEnvironment();
+    const isAnimationEnabled = !performance.eco_mode && theme.animationIntensity > 0;
+
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, amount: 0.2 });
 
@@ -37,11 +42,11 @@ export function ScrollReveal({
     return (
         <motion.div
             ref={ref}
-            initial={getInitialProps()}
-            animate={isInView ? { x: 0, y: 0, opacity: 1, scale: 1 } : getInitialProps()}
+            initial={isAnimationEnabled ? getInitialProps() : { x: 0, y: 0, opacity: 1, scale: 1 }}
+            animate={(isInView || !isAnimationEnabled) ? { x: 0, y: 0, opacity: 1, scale: 1 } : getInitialProps()}
             transition={{
-                duration: duration,
-                delay: delay,
+                duration: isAnimationEnabled ? (duration / Math.max(0.1, theme.animationIntensity)) : 0,
+                delay: isAnimationEnabled ? delay : 0,
                 ease: [0.23, 1, 0.32, 1] // Power4.easeOut
             }}
             className={className}

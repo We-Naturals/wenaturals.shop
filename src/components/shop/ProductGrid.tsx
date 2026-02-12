@@ -17,15 +17,15 @@ function GridContent({ initialProducts, allCategories = [] }: ProductGridProps) 
     const searchParams = useSearchParams();
     const [allProducts, setAllProducts] = useState<any[]>(initialProducts);
     const [displayedProducts, setDisplayedProducts] = useState<any[]>(initialProducts);
-    const [activeCategory, setActiveCategory] = useState("All");
+    const [activeCategory, setActiveCategory] = useState("Everyone");
     const [searchQuery, setSearchQuery] = useState("");
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Categories: Use passed categories OR derive from products if empty
     const categories = useMemo(() => {
-        if (allCategories.length > 0) return ["All", ...allCategories];
+        if (allCategories.length > 0) return ["Everyone", ...allCategories];
         const unique = Array.from(new Set(allProducts.map((p: any) => p.category)));
-        return ["All", ...unique.sort() as string[]];
+        return ["Everyone", ...unique.sort() as string[]];
     }, [allProducts, allCategories]);
 
     useEffect(() => {
@@ -41,7 +41,7 @@ function GridContent({ initialProducts, allCategories = [] }: ProductGridProps) 
     useEffect(() => {
         let filtered = allProducts;
 
-        if (activeCategory !== "All") {
+        if (activeCategory !== "Everyone") {
             // Updated filtering to support multi-category array
             filtered = filtered.filter(p =>
                 p.category === activeCategory ||
@@ -139,7 +139,7 @@ function GridContent({ initialProducts, allCategories = [] }: ProductGridProps) 
                     <div className="py-20 text-center text-zinc-500">
                         <p>No rituals found matching your criteria.</p>
                         <button
-                            onClick={() => { setActiveCategory("All"); setSearchQuery(""); }}
+                            onClick={() => { setActiveCategory("Everyone"); setSearchQuery(""); }}
                             className="mt-4 text-blue-400 underline"
                         >
                             Clear Filters
