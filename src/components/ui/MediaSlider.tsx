@@ -110,6 +110,10 @@ export function MediaSlider({
                                 <img
                                     src={currentItem.url}
                                     alt={currentItem.alt || "Slider Image"}
+                                    onError={(e) => {
+                                        e.currentTarget.src = "/placeholder.jpg";
+                                        e.currentTarget.onerror = null; // Prevent infinite loop
+                                    }}
                                     className="w-full h-auto max-h-[80vh] object-contain rounded-[2rem]"
                                 />
                             </div>

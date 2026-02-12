@@ -33,12 +33,12 @@ const CausticLayer = ({ index, mouseVelocity, scrollY, color }: { index: number,
             }}
         >
             <motion.path
-                d={CAUSTIC_PATHS[index % CAUSTIC_PATHS.length]}
+                d={CAUSTIC_PATHS[index % CAUSTIC_PATHS.length] || CAUSTIC_PATHS[0]}
                 fill="currentColor"
                 style={{ color: color || "inherit" }}
                 className="text-blue-500 dark:text-blue-400"
                 animate={{
-                    d: CAUSTIC_PATHS[(index + 1) % CAUSTIC_PATHS.length],
+                    d: CAUSTIC_PATHS[(index + 1) % CAUSTIC_PATHS.length] || CAUSTIC_PATHS[1],
                     transition: {
                         duration: 5 + index * 2,
                         repeat: Infinity,

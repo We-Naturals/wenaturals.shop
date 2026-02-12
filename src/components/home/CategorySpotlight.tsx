@@ -37,7 +37,7 @@ export function CategorySpotlight(props: { initialContent?: any }) {
             const { data: cats } = await supabase.from('categories').select('name');
 
             // Fetch one product image per category for the background
-            const { data: products } = await supabase.from('products').select('image, categories');
+            const { data: products } = await supabase.from('products').select('image, categories_col:categories');
 
             if (cats && products) {
                 const mappedCats = cats.map((cat: any, i: number) => {
