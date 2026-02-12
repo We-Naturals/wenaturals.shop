@@ -13,6 +13,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
         }
 
+        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            console.error("[PaymentAPI] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing from environment variables");
+            return NextResponse.json({
+                error: "Server configuration incomplete: Missing Supabase Service Role Key. Please add it to your hosting dashboard."
+            }, { status: 500 });
+        }
+
         const supabase = createAdminClient();
 
         // 1. Fetch Order Items (using Admin client to skip RLS)
