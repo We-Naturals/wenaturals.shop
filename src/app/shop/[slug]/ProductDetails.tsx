@@ -393,7 +393,7 @@ export default function ProductDetails({
                                     ))}
                                 </div>
                                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold pt-2">
-                                    Total Value: ${product.bundle_items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                                    Total Value: ₹{product.bundle_items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0).toFixed(2)}
                                 </p>
                             </div>
                         )}

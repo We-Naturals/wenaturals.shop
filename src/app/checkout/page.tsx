@@ -515,7 +515,7 @@ export default function CheckoutPage() {
                             <div className="space-y-4 border-t border-white/10 pt-6">
                                 <div className="flex justify-between text-zinc-400">
                                     <span>Subtotal</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <span>₹{total.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-zinc-400">
                                     <span>Shipping</span>
@@ -523,7 +523,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="flex justify-between text-2xl font-bold pt-4">
                                     <span>Total</span>
-                                    <span className="text-gradient">${total.toFixed(2)}</span>
+                                    <span className="text-gradient">₹{total.toFixed(2)}</span>
                                 </div>
                             </div>
 

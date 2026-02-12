@@ -202,8 +202,8 @@ export default function AdminPage() {
             {/* Advanced Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {[
-                    { label: "Gross Flux", value: `$${stats.revenue.toFixed(2)}`, desc: "Total molecular value", icon: CreditCard, color: "text-blue-400", trend: "+12.5%" },
-                    { label: "Monthly Harvest", value: `$${stats.monthlyRevenue.toFixed(2)}`, desc: "Current moon's cycle", icon: Calendar, color: "text-emerald-400", trend: "+8.2%" },
+                    { label: "Gross Flux", value: `₹${stats.revenue.toFixed(2)}`, desc: "Total molecular value", icon: CreditCard, color: "text-blue-400", trend: "+12.5%" },
+                    { label: "Monthly Harvest", value: `₹${stats.monthlyRevenue.toFixed(2)}`, desc: "Current moon's cycle", icon: Calendar, color: "text-emerald-400", trend: "+8.2%" },
                     { label: "Active Rituals", value: stats.todayOrders, desc: "Active solar cycle", icon: Activity, color: "text-purple-400", trend: stats.todayOrders > 0 ? "+Active" : "Stable" },
                     { label: "Total Rituals", value: stats.orders, desc: "Cumulative performance", icon: ShoppingBag, color: "text-amber-400", trend: "+5.1%" },
                 ].map((stat, i) => (
@@ -241,7 +241,7 @@ export default function AdminPage() {
                         <div className="flex gap-4">
                             <div className="text-right">
                                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">AOV</p>
-                                <p className="text-lg font-mono font-bold">${stats.aov.toFixed(0)}</p>
+                                <p className="text-lg font-mono font-bold">₹{stats.aov.toFixed(0)}</p>
                             </div>
                         </div>
                     </div>
@@ -355,7 +355,7 @@ export default function AdminPage() {
                                             <p className="text-[9px] text-zinc-500 uppercase tracking-tighter">#{order.id.slice(0, 8)}</p>
                                         </div>
                                     </div>
-                                    <p className="text-xs font-mono font-bold text-blue-400">${Number(order.total_amount).toFixed(0)}</p>
+                                    <p className="text-xs font-mono font-bold text-blue-400">₹{Number(order.total_amount).toFixed(0)}</p>
                                 </div>
                             ))}
                         </div>

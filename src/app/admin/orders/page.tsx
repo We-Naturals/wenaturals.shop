@@ -259,7 +259,7 @@ export default function AdminOrdersPage() {
                                                 {order.items?.map((item: any) => (
                                                     <div key={item.id} className="flex justify-between text-sm">
                                                         <span className="text-zinc-300">{item.quantity}x {item.product_name}</span>
-                                                        <span className="text-zinc-600">${item.price_at_purchase}</span>
+                                                        <span className="text-zinc-600">₹{item.price_at_purchase}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -269,7 +269,7 @@ export default function AdminOrdersPage() {
                                         <div className="flex flex-row md:flex-col items-center md:items-end justify-between gap-4 min-w-[120px]">
                                             <div className="text-right">
                                                 <div className="text-xs text-zinc-500 uppercase tracking-widest">Total</div>
-                                                <div className="text-xl font-bold text-gradient">${order.total_amount}</div>
+                                                <div className="text-xl font-bold text-gradient">₹{order.total_amount}</div>
                                             </div>
                                             <div className="p-2 bg-white/5 rounded-full group-hover:bg-white/20 transition-colors">
                                                 <ChevronRight className="w-4 h-4" />
