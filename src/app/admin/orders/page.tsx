@@ -250,6 +250,12 @@ export default function AdminOrdersPage() {
                                                     <span className="text-white">{order.tracking_number}</span>
                                                 </div>
                                             )}
+                                            {order.shipping_address && (
+                                                <div className="mt-2 text-[10px] text-zinc-500 bg-white/5 p-2 rounded-lg border border-white/5">
+                                                    <p className="font-bold text-zinc-400 uppercase tracking-tighter mb-0.5">Delivery Essence</p>
+                                                    <p>{order.shipping_address.street}, {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.pincode}</p>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Items Preview */}

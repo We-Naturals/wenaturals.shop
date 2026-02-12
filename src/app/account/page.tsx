@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import { Package, MapPin, User, LogOut, Loader2 } from "lucide-react"; // Added Loader2
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Trash2 } from "lucide-react";
+import { deleteAddressAction } from "@/app/actions/addresses";
 
 export default function AccountPage() {
     const [user, setUser] = useState<any>(null);
@@ -52,6 +54,17 @@ export default function AccountPage() {
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.push("/");
+    };
+
+    const handleDeleteAddress = async (id: string) => {
+        if (!confirm("Remove this location from your sanctuary?")) return;
+        try {
+            await deleteAddressAction(id);
+            setAddresses(prev => prev.filter(a => a.id !== id));
+        } catch (err) {
+            console.error(err);
+            alert("Failed to remove address");
+        }
     };
 
     if (loading) return (
@@ -119,8 +132,16 @@ export default function AccountPage() {
 
                                         <div className="pt-4 border-t border-white/10 flex justify-between font-bold">
                                             <span>Total Essence</span>
-                                            <span className="text-gradient">${order.total_amount}</span>
+                                            <span className="text-gradient">₹{order.total_amount}</span>
                                         </div>
+
+                                        {order.shipping_address && (
+                                            <div className="mt-4 p-3 rounded-lg bg-white/5 border border-white/5 space-y-1">
+                                                <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Shipment Destination</p>
+                                                <p className="text-xs text-zinc-300 font-medium">{order.shipping_address.street}</p>
+                                                <p className="text-[10px] text-zinc-500">{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.pincode}</p>
+                                            </div>
+                                        )}
                                     </GlassCard>
                                 ))}
                             </div>
@@ -139,11 +160,19 @@ export default function AccountPage() {
                                 <GlassCard key={addr.id} className="p-6 space-y-2">
                                     <div className="flex justify-between items-center">
                                         <h3 className="font-bold text-sm">{addr.name}</h3>
-                                        {addr.is_default && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">DEFAULT</span>}
+                                        <div className="flex items-center gap-2">
+                                            {addr.is_default && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold">DEFAULT</span>}
+                                            <button
+                                                onClick={() => handleDeleteAddress(addr.id)}
+                                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                     <p className="text-xs text-zinc-400">{addr.street}</p>
                                     <p className="text-xs text-zinc-400">{addr.city}, {addr.state} {addr.pincode}</p>
-                                    <p className="text-xs text-zinc-400">{addr.phone}</p>
+                                    <p className="text-xs text-zinc-400 font-mono">{addr.phone}</p>
                                 </GlassCard>
                             ))}
 
