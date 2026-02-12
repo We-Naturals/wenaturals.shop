@@ -6,102 +6,38 @@ export interface OrderData extends OrderPayload { }
 export const OrderService = {
     async createOrder(data: OrderData) {
         // 1. Zod Validation Gate
-        // This will throw a ZodError if the data is invalid (e.g., bad pincode)
         const validatedData = OrderPayloadSchema.parse(data);
-
         const supabase = createClient();
 
-        // 1. Validate Prices & Calculate Server-Side Total
-        // Extract product IDs
-        const productIds = data.items.map(item => item.id);
-
-        // Fetch actual product details from DB
-        const { data: dbProducts, error: productsError } = await supabase
-            .from('products')
-            .select('id, name, price, stock')
-            .in('id', productIds);
-
-        if (productsError) throw new Error("Failed to validate product prices: " + productsError.message);
-        if (!dbProducts || dbProducts.length !== productIds.length) {
-            // Note: This might happen if a product was deleted but is still in cart.
-            // For now, we strict fail.
-            throw new Error("One or more items in your cart are no longer available.");
-        }
-
-        // Map DB products for easy lookup
-        const productMap = new Map(dbProducts.map(p => [p.id, p]));
-
-        let calculatedTotal = 0;
-        const validatedItems = data.items.map(clientItem => {
-            const dbProduct = productMap.get(clientItem.id);
-            if (!dbProduct) throw new Error(`Product ${clientItem.name} not found.`);
-
-            // Stock Validation
-            if (dbProduct.stock < clientItem.quantity) {
-                throw new Error(`Insufficient stock for ${dbProduct.name}. Only ${dbProduct.stock} left.`);
-            }
-
-            // Use DB price. If DB price is null/undefined, handle gracefully (assume 0 or error)
-            const realPrice = dbProduct.price || 0;
-
-            calculatedTotal += realPrice * clientItem.quantity;
-
-            return {
-                product_id: clientItem.id,
-                product_name: dbProduct.name, // Use DB name to be safe too
-                quantity: clientItem.quantity,
-                price_at_purchase: realPrice
-            };
-        });
-
-        // 2. Insert Order (With Validated Total)
-        const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .insert({
-                user_id: data.user_id,
-                customer_email: data.customer_email,
-                customer_name: data.customer_name,
-                customer_phone: data.customer_phone,
-                shipping_address: data.shipping_address,
-                total_amount: calculatedTotal, // <--- TRUSTED VALUE
-                payment_method: validatedData.payment_method,
-                payment_status: validatedData.payment_status,
-                payment_id: validatedData.payment_id,
-                status: 'pending'
-            })
-            .select()
-            .single();
-
-        if (orderError) throw orderError;
-
-        // 3. Insert Order Items (With Validated Prices)
-        const orderItemsToInsert = validatedItems.map(item => ({
-            order_id: order.id,
-            ...item
+        // 2. Prepare items for RPC (mapping to database types)
+        const orderItems = validatedData.items.map(item => ({
+            product_id: item.id,
+            product_name: item.name || "Unknown Product",
+            quantity: item.quantity,
+            price_at_purchase: item.price ? Number(item.price) : 0
         }));
 
-        const { error: itemsError } = await supabase
-            .from('order_items')
-            .insert(orderItemsToInsert);
+        // 3. Call Atomic RPC
+        // This handles stock validation, stock decrement, order insertion, and item insertion in ONE transaction.
+        const { data: order, error: rpcError } = await supabase.rpc('create_order_v1', {
+            p_user_id: validatedData.user_id,
+            p_customer_email: validatedData.customer_email,
+            p_customer_name: validatedData.customer_name,
+            p_customer_phone: validatedData.customer_phone,
+            p_shipping_address: validatedData.shipping_address,
+            p_payment_method: validatedData.payment_method,
+            p_payment_status: validatedData.payment_status,
+            p_payment_id: validatedData.payment_id || null,
+            p_items: orderItems
+        });
 
-        if (itemsError) throw itemsError;
-
-        // 4. Decerement Stock
-        // Note: In a high-concurrency partial failure scenario, this could ideally be an RPC or transaction.
-        // For MVP, we iterate. If this fails, stock count might be off, but order exists.
-        // We could wrap in try/catch but let's let it bubble for now so we see errors.
-        for (const item of validatedItems) {
-            const currentStock = productMap.get(item.product_id)!.stock;
-            const newStock = Math.max(0, currentStock - item.quantity);
-
-            await supabase
-                .from('products')
-                .update({ stock: newStock })
-                .eq('id', item.product_id);
+        if (rpcError) {
+            console.error("Order RPC Error:", rpcError);
+            throw new Error(rpcError.message || "Failed to process order transaction.");
         }
 
-        // Return the full order object with the CORRECT total
-        return { ...order, items: orderItemsToInsert };
+        // Return the created order object returned by the RPC
+        return order;
     },
 
     async saveAddress(userId: string, addressData: any) {
@@ -156,11 +92,19 @@ export const OrderService = {
             .update({
                 payment_id: paymentId,
                 payment_status: status,
-                // If paid, we might want to update the main status too?
-                // For now, let's keep main status as 'pending' (fulfillment status) and payment_status separate.
-                // Or maybe set status='processing' if paid?
-                // Let's stick to updating payment columns.
             })
+            .eq('id', orderId);
+
+        if (error) throw error;
+    },
+
+    async updateOrderStatus(orderId: string, status: string, note?: string) {
+        const supabase = createClient();
+
+        // The database trigger will automatically create an order_history record
+        const { error } = await supabase
+            .from('orders')
+            .update({ status })
             .eq('id', orderId);
 
         if (error) throw error;
