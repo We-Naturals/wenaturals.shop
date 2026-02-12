@@ -184,6 +184,13 @@ export default function CheckoutPage() {
 
         } catch (error: any) {
             console.error(error);
+            // Self-Healing: If product not found (P0001 or text match), clear cart automatically
+            if (error.message.includes("not found") || error.code === "P0001" || error.message.includes("P0001")) {
+                alert("Sanctuary Update: Some items in your cart are no longer available in our inventory. The cart has been refreshed for you.");
+                clearCart();
+                router.push("/shop");
+                return;
+            }
             alert("Sanctuary Error: " + error.message);
             setLoading(false);
         }
