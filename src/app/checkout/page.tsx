@@ -204,8 +204,7 @@ export default function CheckoutPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    amount: order.total_amount,
-                    receipt: order.id,
+                    order_id: order.id,
                 }),
             });
 
