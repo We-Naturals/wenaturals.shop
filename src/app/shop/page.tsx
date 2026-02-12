@@ -10,7 +10,7 @@ import { CartSidebar } from "@/components/cart/CartSidebar";
 import { ShopHero } from "../../components/shop/ShopHero";
 import { createClient } from "@/lib/supabase-server";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0; // Disable cache to prevent stale products
 
 export default async function ShopPage() {
     const supabase = await createClient();
