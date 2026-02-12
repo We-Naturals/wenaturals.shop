@@ -1,8 +1,10 @@
 "use server";
 
 import { createClient } from "@/lib/supabase-server";
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchProducts(page: number, pageSize: number = 12) {
+    noStore(); // Disable caching for this action
     const supabase = await createClient();
 
     // Calculate range
