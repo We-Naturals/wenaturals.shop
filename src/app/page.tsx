@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Philosophy } from "@/components/home/Philosophy";
 import { CategorySpotlight } from "@/components/home/CategorySpotlight";
 import { RitualJournal } from "@/components/home/RitualJournal";
-import { ClientRituals } from "@/components/home/ClientRituals";
+import { createClient } from "@/lib/supabase-server";
 import { FeaturedCollection } from "@/components/home/FeaturedCollection";
 import { YoutubeShorts } from "@/components/home/YoutubeShorts";
 import { getSiteConfig, getAllProducts } from "@/lib/content-server";
@@ -33,7 +33,7 @@ export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
 export default async function Home() {
   // 1. Parallel Data Fetching
-  const [siteConfig, products] = await Promise.all([
+  const [siteConfig, products, allCategories] = await Promise.all([
     getSiteConfig([
       'homepage_layout',
       'content_homepage', // Hero
@@ -46,8 +46,13 @@ export default async function Home() {
       'content_marquee_top',
       'content_marquee_bottom'
     ]),
-    getAllProducts()
+    getAllProducts(),
+    (async () => {
+      const { data } = await createClient().then(s => s.from('categories').select('name').order('name'));
+      return data?.map((c: any) => c.name) || [];
+    })() // Fetch all categories for the filter
   ]);
+
 
   const layout = Array.isArray(siteConfig['homepage_layout'])
     ? siteConfig['homepage_layout']
@@ -80,7 +85,7 @@ export default async function Home() {
 
           // Pass products explicitly to FeaturedCollection
           if (sectionKey === 'featured') {
-            return <Component key={sectionKey} initialContent={sectionData} initialProducts={products} />;
+            return <Component key={sectionKey} initialContent={sectionData} initialProducts={products} allCategories={allCategories} />;
           }
 
           return <Component key={sectionKey} initialContent={sectionData} />;

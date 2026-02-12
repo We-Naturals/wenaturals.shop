@@ -17,16 +17,26 @@ export default async function ShopPage() {
     const { data: rawProducts } = await supabase
         .from('products')
         .select(`
-            *,
-            categories (name)
+            *
         `)
         .order('created_at', { ascending: false })
         .range(0, 11);
 
+    // Fetch Unique Categories (derived from all products for now, or could be separate table)
+    // Since we want ALL visible categories, we can fetch distinct categories from DB or use the categories table if populated.
+    // Let's use the categories table if available, but for now, let's fetch all products to get unique categories if the table isn't fully relied upon yet.
+    // BETTER: specific query for categories table.
+    const { data: allCategories } = await supabase
+        .from('categories')
+        .select('name')
+        .order('name');
+
+    const categoryList = allCategories?.map((c: any) => c.name) || [];
+
     // Map categories structure (same logic as before, now on server)
     const products = rawProducts?.map((p: any) => ({
         ...p,
-        category: p.category || p.categories?.name || "Uncategorized"
+        category: p.categories?.[0] || p.category || "Uncategorized"
     })) || [];
 
     // Fetch Page Content
@@ -51,7 +61,7 @@ export default async function ShopPage() {
                 heading={shopContent.heading}
                 media={shopContent.media || []}
             />
-            <ProductGrid initialProducts={products} />
+            <ProductGrid initialProducts={products} allCategories={categoryList} />
             <Footer />
             <CartSidebar />
         </main>

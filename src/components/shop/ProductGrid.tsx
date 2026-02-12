@@ -10,9 +10,10 @@ import { ProductFilterBar } from "./ProductFilterBar";
 
 interface ProductGridProps {
     initialProducts: any[];
+    allCategories?: string[];
 }
 
-function GridContent({ initialProducts }: ProductGridProps) {
+function GridContent({ initialProducts, allCategories = [] }: ProductGridProps) {
     const searchParams = useSearchParams();
     const [allProducts, setAllProducts] = useState<any[]>(initialProducts);
     const [displayedProducts, setDisplayedProducts] = useState<any[]>(initialProducts);
@@ -20,11 +21,12 @@ function GridContent({ initialProducts }: ProductGridProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // Categories derived from ALL products (initial + loaded)
+    // Categories: Use passed categories OR derive from products if empty
     const categories = useMemo(() => {
+        if (allCategories.length > 0) return ["All", ...allCategories];
         const unique = Array.from(new Set(allProducts.map((p: any) => p.category)));
-        return unique.sort() as string[];
-    }, [allProducts]);
+        return ["All", ...unique.sort() as string[]];
+    }, [allProducts, allCategories]);
 
     useEffect(() => {
         setIsHydrated(true);
@@ -40,7 +42,11 @@ function GridContent({ initialProducts }: ProductGridProps) {
         let filtered = allProducts;
 
         if (activeCategory !== "All") {
-            filtered = filtered.filter(p => p.category === activeCategory);
+            // Updated filtering to support multi-category array
+            filtered = filtered.filter(p =>
+                p.category === activeCategory ||
+                (p.categories && p.categories.includes(activeCategory))
+            );
         }
 
         if (searchQuery) {
@@ -148,10 +154,10 @@ function GridContent({ initialProducts }: ProductGridProps) {
     );
 }
 
-export function ProductGrid({ initialProducts }: ProductGridProps) {
+export function ProductGrid({ initialProducts, allCategories }: ProductGridProps) {
     return (
         <Suspense fallback={<div className="min-h-screen animate-pulse bg-white/5" />}>
-            <GridContent initialProducts={initialProducts} />
+            <GridContent initialProducts={initialProducts} allCategories={allCategories} />
         </Suspense>
     );
 }

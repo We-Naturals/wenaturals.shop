@@ -175,6 +175,10 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
 
         // Remove related_blogs from top level to avoid schema error if column missing
         delete (payload as any).related_blogs;
+        // Remove generated columns that cannot be updated
+        delete (payload as any).fts;
+        delete (payload as any).created_at;
+        delete (payload as any).updated_at;
 
         try {
             if (initialData) {
@@ -192,14 +196,14 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
             onSubmit(payload);
             onClose();
         } catch (error: any) {
-            console.error("Error saving product:", error);
+            console.error("Full Error Object:", JSON.stringify(error, null, 2));
             console.error("Error details:", {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code
+                message: error?.message,
+                details: error?.details,
+                hint: error?.hint,
+                code: error?.code
             });
-            alert(`Error saving product: ${error.message || "Check console for details"}`);
+            alert(`Error saving product: ${error?.message || "Unknown error. Check console."}`);
         } finally {
             setLoading(false);
         }

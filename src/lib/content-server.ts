@@ -25,13 +25,13 @@ export async function getAllProducts() {
     const supabase = await createClient();
     const { data } = await supabase
         .from('products')
-        .select(`*, categories (name)`)
+        .select(`*`)
         .order('created_at', { ascending: false });
 
     if (!data) return [];
 
     return data.map((p: any) => ({
         ...p,
-        category: p.category || p.categories?.name || "Uncategorized"
+        category: p.categories?.[0] || p.category || "Uncategorized"
     }));
 }

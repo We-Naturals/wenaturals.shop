@@ -164,46 +164,8 @@ export function ProductCard({
                             onMouseEnter={() => setShowDetails(true)}
                             onMouseLeave={() => setShowDetails(false)}
                         >
-                            <div ref={imageRef} className="absolute inset-0 scale-110 overflow-hidden">
-                                {/* Sacred Geometry Mask System (Batch 8.4 - Ultra Stable) */}
-                                <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
-                                    <svg>
-                                        <defs>
-                                            <mask id={`mask-fol-${id}`} maskContentUnits="objectBoundingBox">
-                                                <rect width="1" height="1" fill="black" />
-                                                <motion.g
-                                                    initial={false}
-                                                    animate={{
-                                                        scale: showDetails ? 3 : 1,
-                                                        rotate: showDetails ? 90 : 0
-                                                    }}
-                                                    transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                                                    style={{ transformOrigin: "0.5 0.5" }}
-                                                >
-                                                    <circle cx="0.5" cy="0.5" r="0.35" fill="white" />
-                                                    {[...Array(6)].map((_, i) => (
-                                                        <circle
-                                                            key={i}
-                                                            cx={0.5 + 0.15 * Math.cos(i * 60 * Math.PI / 180)}
-                                                            cy={0.5 + 0.15 * Math.sin(i * 60 * Math.PI / 180)}
-                                                            r="0.35"
-                                                            fill="white"
-                                                        />
-                                                    ))}
-                                                </motion.g>
-                                            </mask>
-                                        </defs>
-                                    </svg>
-                                </div>
-
-                                <motion.div
-                                    className="w-full h-full relative"
-                                    style={{
-                                        maskImage: `url(#mask-fol-${id})`,
-                                        WebkitMaskImage: `url(#mask-fol-${id})`,
-                                        mask: `url(#mask-fol-${id})`
-                                    }}
-                                >
+                            <div ref={imageRef} className="absolute inset-0 overflow-hidden">
+                                <div className="w-full h-full relative">
                                     {typeof image === 'string' && image.endsWith('.mp4') ? (
                                         <video
                                             src={image}
@@ -237,7 +199,7 @@ export function ProductCard({
                                             background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, transparent 80%)'
                                         }}
                                     />
-                                </motion.div>
+                                </div>
 
                                 {/* Refractive Light Leak Hover */}
                                 <motion.div
@@ -333,7 +295,7 @@ export function ProductCard({
                         </div>
                     </SpotlightCard>
                 </motion.div>
-            </PrefetchLink>
+            </PrefetchLink >
 
             <ExplodedViewModal
                 isOpen={isExplodedOpen}
@@ -352,6 +314,6 @@ export function ProductCard({
                     slug: productSlug
                 }}
             />
-        </ContentWrapperHelper>
+        </ContentWrapperHelper >
     );
 }

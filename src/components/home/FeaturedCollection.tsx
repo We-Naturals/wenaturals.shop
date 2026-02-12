@@ -19,7 +19,7 @@ import { RecursiveGeometry } from "@/components/ui/RecursiveGeometry";
 
 const DEFAULT_FEATURED: any[] = [];
 
-export function FeaturedCollection(props: { initialContent?: any, initialProducts?: any[] }) {
+export function FeaturedCollection(props: { initialContent?: any, initialProducts?: any[], allCategories?: string[] }) {
     const searchParams = useSearchParams();
     const isAdminPreview = searchParams.get('admin_preview') === 'true';
 
@@ -41,8 +41,13 @@ export function FeaturedCollection(props: { initialContent?: any, initialProduct
         setIsMounted(true);
 
         if (props.initialProducts) {
-            const uniqueCats = Array.from(new Set(props.initialProducts.map((p: any) => p.category)));
-            setCategories(["Everyone", ...uniqueCats as string[]]);
+            // Use passed allCategories if available, otherwise derive from products
+            if (props.allCategories && props.allCategories.length > 0) {
+                setCategories(["Everyone", ...props.allCategories]);
+            } else {
+                const uniqueCats = Array.from(new Set(props.initialProducts.map((p: any) => p.category)));
+                setCategories(["Everyone", ...uniqueCats as string[]]);
+            }
             return;
         }
 
@@ -54,8 +59,7 @@ export function FeaturedCollection(props: { initialContent?: any, initialProduct
                 const { data, error } = await supabase
                     .from('products')
                     .select(`
-                        *,
-                        categories (name)
+                        *
                     `)
                     .order('created_at', { ascending: false });
 
@@ -64,7 +68,7 @@ export function FeaturedCollection(props: { initialContent?: any, initialProduct
                 } else if (data) {
                     const mappedProducts = data.map((p: any) => ({
                         ...p,
-                        category: p.category || p.categories?.name || "Uncategorized"
+                        category: p.categories?.[0] || p.category || "Uncategorized"
                     }));
 
                     setAllProducts(mappedProducts);
@@ -86,7 +90,10 @@ export function FeaturedCollection(props: { initialContent?: any, initialProduct
         if (category === "Everyone") {
             setProducts(allProducts.slice(0, 3));
         } else {
-            const filtered = allProducts.filter(p => p.category === category);
+            const filtered = allProducts.filter(p =>
+                p.category === category ||
+                (p.categories && p.categories.includes(category))
+            );
             setProducts(filtered.slice(0, 3));
         }
     };

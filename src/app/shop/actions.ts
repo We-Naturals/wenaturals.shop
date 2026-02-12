@@ -13,7 +13,7 @@ export async function fetchProducts(page: number, pageSize: number = 12) {
         .from('products')
         .select(`
             *,
-            categories (name)
+            *
         `)
         .order('created_at', { ascending: false })
         .range(from, to);
@@ -26,7 +26,7 @@ export async function fetchProducts(page: number, pageSize: number = 12) {
     // Map categories structure
     const products = data?.map((p: any) => ({
         ...p,
-        category: p.category || p.categories?.name || "Uncategorized"
+        category: p.categories?.[0] || p.category || "Uncategorized"
     })) || [];
 
     return products;
@@ -39,7 +39,7 @@ export async function getProductDetails(slug: string) {
         .from('products')
         .select(`
             *,
-            categories (name)
+            *
         `)
         .eq('slug', slug)
         .single();
@@ -51,6 +51,6 @@ export async function getProductDetails(slug: string) {
 
     return {
         ...data,
-        category: data.category || data.categories?.name || "Uncategorized"
+        category: data.categories?.[0] || data.category || "Uncategorized"
     };
 }
