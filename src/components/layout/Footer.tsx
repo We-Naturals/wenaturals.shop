@@ -1,12 +1,13 @@
 "use client";
 
 import { motion, Variants, AnimatePresence } from "framer-motion";
-import { Instagram, Youtube, Mail, Heart } from "lucide-react";
+import { Instagram, Youtube, Mail, Heart, Volume2, VolumeX } from "lucide-react";
 import { AmazonLogo, FlipkartLogo, MeeshoLogo } from "@/components/icons/MarketplaceIcons";
 import { createClient } from "@/lib/supabase";
 import { useState, useEffect } from "react";
 import { useContent } from "@/hooks/useContent";
 import { cn } from "@/lib/utils";
+import { useSensory } from "@/components/providers/SensoryProvider";
 
 const FOOTER_LINKS = [
     {
@@ -39,6 +40,7 @@ export function Footer() {
 
     const [email, setEmail] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
+    const { soundEnabled, toggleSound } = useSensory();
 
     const handleJoin = () => {
         if (email.includes("@")) {
@@ -288,6 +290,15 @@ export function Footer() {
                             <a href={`mailto:${socialLinks.mail}`} className="text-zinc-500 hover:text-black dark:hover:text-white transition-all hover:scale-110">
                                 <Mail className="w-4 h-4" />
                             </a>
+                            <div className="w-px h-4 bg-zinc-300 dark:bg-zinc-700 mx-2" />
+                            <button
+                                onClick={toggleSound}
+                                className="text-zinc-500 hover:text-blue-500 transition-all hover:scale-110"
+                                aria-label={soundEnabled ? "Mute Sound" : "Enable Sound"}
+                                title={soundEnabled ? "Mute Sound" : "Enable Sound"}
+                            >
+                                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                            </button>
                         </div>
                     </motion.div>
                 </div>

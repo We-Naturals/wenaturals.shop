@@ -14,6 +14,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useSensory } from "@/components/providers/SensoryProvider";
 import { ExplodedViewModal } from "./ExplodedViewModal";
 import Link from "next/link";
+import { PrefetchLink } from "@/components/ui/PrefetchLink";
 import { AlchemicalSurface } from "@/components/ui/AlchemicalSurface";
 
 interface ProductCardProps {
@@ -117,7 +118,7 @@ export function ProductCard({
 
     return (
         <ContentWrapperHelper alchemyConfig={alchemyConfig}>
-            <Link href={`/shop/${productSlug}`} className="block group cursor-pointer">
+            <PrefetchLink href={`/shop/${productSlug}`} slug={productSlug} className="block group cursor-pointer">
                 <motion.div
                     ref={cardRef}
                     onMouseMove={handleMouseMove}
@@ -286,6 +287,7 @@ export function ProductCard({
                                     <button
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(e); }}
                                         className="p-2 glass dark:glass rounded-full hover:bg-white/20 dark:hover:bg-white/10 transition-all active:scale-90 border border-white/10"
+                                        aria-label="Quick Add"
                                     >
                                         <Plus className="w-4 h-4 text-zinc-900 dark:text-white" />
                                     </button>
@@ -294,6 +296,7 @@ export function ProductCard({
                                     <button
                                         onClick={toggleExploded}
                                         className="p-2 glass dark:glass rounded-full hover:bg-white/20 dark:hover:bg-white/10 transition-all active:scale-90 border border-white/10"
+                                        aria-label="Quick View"
                                     >
                                         <Eye className="w-4 h-4 text-zinc-900 dark:text-white" />
                                     </button>
@@ -330,7 +333,7 @@ export function ProductCard({
                         </div>
                     </SpotlightCard>
                 </motion.div>
-            </Link>
+            </PrefetchLink>
 
             <ExplodedViewModal
                 isOpen={isExplodedOpen}

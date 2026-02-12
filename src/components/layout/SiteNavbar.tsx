@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase";
 import { useContent } from "@/hooks/useContent";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useSensory } from "@/components/providers/SensoryProvider";
+import { GlobalSearch } from "./GlobalSearch";
 
 const DEFAULT_CATEGORIES: string[] = [];
 
@@ -19,7 +20,6 @@ export function SiteNavbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
     const [categories, setCategories] = useState<string[]>([]);
     const [products, setProducts] = useState<any[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
@@ -98,14 +98,6 @@ export function SiteNavbar() {
     const displayProducts = activeCategory
         ? products.filter(p => p.category === activeCategory).slice(0, 4)
         : products.slice(0, 4);
-
-    // Filter products for search
-    const filteredProducts = searchQuery.trim() === ""
-        ? []
-        : products.filter(p =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.category?.toLowerCase().includes(searchQuery.toLowerCase())
-        ).slice(0, 8);
 
     const marketingContent = useContent('content_marketing');
     const showAnnouncement = marketingContent?.announcement_bar?.enabled && marketingContent?.announcement_bar?.text;
@@ -196,12 +188,14 @@ export function SiteNavbar() {
                                 }
                             }}
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
+                            aria-label="Account"
                         >
                             <User className="w-5 h-5" />
                         </button>
                         <button
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
                             onClick={() => setIsSearchOpen(true)}
+                            aria-label="Open Search"
                         >
                             <Search className="w-5 h-5" />
                         </button>
@@ -211,6 +205,10 @@ export function SiteNavbar() {
                                 toggleCart();
                                 // playLiquid(); // Removed per user request
                             }}
+                            role="button"
+                            aria-label="Open Cart"
+                            tabIndex={0}
+                            onKeyDown={(e) => e.key === 'Enter' && toggleCart()}
                         >
                             <ShoppingCart className="w-5 h-5 text-zinc-600 dark:text-zinc-300 group-hover:text-blue-500 transition-colors" />
                             {isHydrated && itemCount > 0 && (
@@ -226,6 +224,7 @@ export function SiteNavbar() {
                         <button
                             className="p-2 md:hidden hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-zinc-600 dark:text-white"
                             onClick={() => setIsMobileMenuOpen(true)}
+                            aria-label="Open Menu"
                         >
                             <Menu className="w-6 h-6" />
                         </button>
@@ -423,92 +422,12 @@ export function SiteNavbar() {
                 )}
             </AnimatePresence>
 
-            {/* Search Overlay */}
-            <AnimatePresence>
-                {isSearchOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-zinc-50/95 dark:bg-black/95 backdrop-blur-2xl flex flex-col items-center pt-24 px-6 transition-colors duration-300"
-                    >
-                        <button
-                            onClick={() => setIsSearchOpen(false)}
-                            className="absolute top-8 right-8 p-4 hover:bg-zinc-200 dark:hover:bg-white/10 rounded-full transition-all group"
-                        >
-                            <X className="w-8 h-8 text-zinc-900 dark:text-white group-hover:rotate-90 transition-transform" />
-                        </button>
+            {/* Global Search Component */}
+            <GlobalSearch
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+            />
 
-                        <div className="w-full max-w-3xl space-y-12">
-                            <div className="relative group">
-                                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-zinc-400 dark:text-zinc-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors" />
-                                <input
-                                    autoFocus
-                                    type="text"
-                                    placeholder="Search for alchemy..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl py-5 md:py-6 pl-14 md:pl-16 pr-6 md:pr-8 text-lg md:text-2xl outline-none focus:border-blue-500/50 transition-all font-light tracking-wide text-zinc-900 dark:text-white placeholder:text-zinc-400"
-                                />
-                                <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-700" />
-                            </div>
-
-                            <div className="space-y-6">
-                                {searchQuery.trim() !== "" && filteredProducts.length > 0 && (
-                                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 px-2">Matching Products ({filteredProducts.length})</h3>
-                                )}
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-20 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
-                                    {filteredProducts.map((product) => (
-                                        <Link
-                                            key={product.id}
-                                            href={`/shop/${product.slug}`}
-                                            onClick={() => {
-                                                setIsSearchOpen(false);
-                                                setSearchQuery("");
-                                            }}
-                                            className="group flex items-center gap-6 p-4 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all"
-                                        >
-                                            <div className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0">
-                                                <Image
-                                                    src={product.media?.[0] || "/placeholder.jpg"}
-                                                    alt={product.name}
-                                                    fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">{product.name}</h4>
-                                                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">{product.category}</p>
-                                                <p className="text-sm font-bold text-gradient">
-                                                    {product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : product.currency === 'GBP' ? '£' : product.currency === 'INR' ? '₹' : product.currency === 'JPY' ? '¥' : ''}{product.price}
-                                                </p>
-                                            </div>
-                                            <ArrowRight className="w-5 h-5 text-zinc-400 dark:text-zinc-700 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
-                                        </Link>
-                                    ))}
-
-                                    {searchQuery.trim() !== "" && filteredProducts.length === 0 && (
-                                        <div className="col-span-2 py-20 text-center space-y-4">
-                                            <div className="w-16 h-16 bg-zinc-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                                                <Search className="w-8 h-8 text-zinc-400 dark:text-zinc-700" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-zinc-500 dark:text-zinc-400">No matches found for "{searchQuery}"</h3>
-                                            <p className="text-zinc-600 max-w-xs mx-auto text-sm">Try searching for ingredients, categories, or specific products.</p>
-                                        </div>
-                                    )}
-
-                                    {searchQuery.trim() === "" && (
-                                        <div className="col-span-2 py-12 text-center text-zinc-600 text-sm italic">
-                                            Experience the search. Type to discover our collection.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
             {/* Biomorphic Filter Definition */}
             <svg className="hidden">

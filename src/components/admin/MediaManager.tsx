@@ -52,11 +52,19 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
                 multiple: true,
                 resourceType: "auto",
                 clientAllowedFormats: ["image", "video"],
-                maxFileSize: 10000000, // 10MB
+                maxFileSize: 52428800, // 50MB Global Limit (for Videos)
             },
             (error: any, result: any) => {
                 if (!error && result && result.event === "success") {
-                    addMedia(result.info.secure_url);
+                    const file = result.info;
+
+                    // Strict Validation for Images (Max 5MB)
+                    if (file.resource_type === 'image' && file.bytes > 5242880) {
+                        alert("Image too large! Please upload images under 5MB.");
+                        return;
+                    }
+
+                    addMedia(file.secure_url);
                 }
             }
         );

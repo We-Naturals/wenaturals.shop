@@ -31,3 +31,26 @@ export async function fetchProducts(page: number, pageSize: number = 12) {
 
     return products;
 }
+
+export async function getProductDetails(slug: string) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from('products')
+        .select(`
+            *,
+            categories (name)
+        `)
+        .eq('slug', slug)
+        .single();
+
+    if (error) {
+        console.error("Error fetching product details:", error);
+        return null;
+    }
+
+    return {
+        ...data,
+        category: data.category || data.categories?.name || "Uncategorized"
+    };
+}
