@@ -51,14 +51,15 @@ export async function sendOrderConfirmation(orderData: any) {
         });
 
         if (error) {
-            console.error('Email Error:', error);
+            console.error('Resend API Error:', error);
             // Don't throw, just log. We don't want to break the checkout success page if email fails.
             return { success: false, error };
         }
 
+        console.log("Email sent successfully:", data?.id);
         return { success: true, data };
     } catch (error) {
-        console.error('Email Exception:', error);
+        console.error('Email Exception (Check API Key):', error);
         return { success: false, error };
     }
 }
