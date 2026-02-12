@@ -26,6 +26,8 @@
     "framer-motion": "^12.31.1",
     "gsap": "^3.14.2",
     "gsap-trial": "npm:gsap@^3.14.2",
+    "jspdf": "^4.1.0",
+    "jspdf-autotable": "^5.0.7",
     "lenis": "^1.3.17",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",

@@ -34,7 +34,33 @@ export default function AdminOrdersPage() {
                 setLoading(false);
             }
         };
+
         fetchOrders();
+
+        // ---------------------------------------------------------
+        // REALTIME SUBSCRIPTION (Admin View)
+        // ---------------------------------------------------------
+        const supabase = createClient();
+        const channel = supabase
+            .channel('admin-realtime-orders')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*', // Listen to INSERT (new orders) and UPDATE (status changes)
+                    schema: 'public',
+                    table: 'orders',
+                },
+                (payload) => {
+                    console.log("Admin Realtime Update:", payload);
+                    // Simple Strategy: Re-fetch to guarantee sort order and joined data accuracy
+                    fetchOrders();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const initiateStatusUpdate = (orderId: string, newStatus: string) => {
@@ -79,14 +105,23 @@ export default function AdminOrdersPage() {
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
 
             await updateOrderStatus(orderId, newStatus);
-            // alert("Status updated"); // Optional: Toast would be better
         } catch (error) {
             console.error("Failed to update status", error);
             alert("Failed to update status");
-            // Revert on error properly would require refetch or more complex state, 
-            // but for now let's just re-fetch
             const data = await OrderService.getOrders();
             setOrders(data || []);
+        }
+    };
+
+    const updateOrderPaymentStatus = async (orderId: string, newPaymentStatus: string) => {
+        try {
+            // Optimistic Update
+            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, payment_status: newPaymentStatus } : o));
+            // We reuse updateOrderStatus but pass undefined for status
+            await updateOrderStatus(orderId, undefined as any, undefined, undefined, newPaymentStatus);
+        } catch (error) {
+            console.error("Failed to update payment status", error);
+            alert("Failed to update payment status");
         }
     };
 
@@ -98,10 +133,12 @@ export default function AdminOrdersPage() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "paid": return "text-green-400 bg-green-500/10";
-            case "pending": return "text-yellow-400 bg-yellow-500/10";
+            case "processing": return "text-purple-400 bg-purple-500/10";
             case "shipped": return "text-blue-400 bg-blue-500/10";
+            case "out_for_delivery": return "text-orange-400 bg-orange-500/10";
             case "delivered": return "text-emerald-400 bg-emerald-500/10";
             case "cancelled": return "text-red-400 bg-red-500/10";
+            case "returned": return "text-rose-400 bg-rose-500/10";
             default: return "text-zinc-400 bg-white/5";
         }
     };
@@ -210,28 +247,70 @@ export default function AdminOrdersPage() {
 
                                         {/* Info */}
                                         <div className="space-y-1">
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-mono text-xs text-zinc-500">#{order.id.slice(0, 8)}</span>
-                                                <div className="relative group/status">
-                                                    <button className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest flex items-center gap-1 ${getStatusColor(order.status)}`}>
-                                                        {order.status}
-                                                        <ChevronRight className="w-3 h-3 rotate-90 opacity-50" />
-                                                    </button>
-                                                    {/* Status Dropdown */}
-                                                    <div className="absolute top-full left-0 pt-2 z-20 hidden group-hover/status:block min-w-[120px]">
-                                                        <div className="bg-black border border-white/10 rounded-lg overflow-hidden shadow-xl">
-                                                            {["pending", "paid", "shipped", "delivered", "cancelled"].map((s) => (
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono text-xs text-zinc-500">#{order.id.slice(0, 8)}</span>
+
+                                                    {/* DELIVERY STATUS */}
+                                                    <div className="relative group/status">
+                                                        <button className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest flex items-center gap-1 ${getStatusColor(order.status)}`}>
+                                                            {order.status.replace(/_/g, ' ')}
+                                                            <ChevronRight className="w-3 h-3 rotate-90 opacity-50" />
+                                                        </button>
+                                                        {/* Chronological Status Dropdown */}
+                                                        <div className="absolute top-full left-0 pt-2 z-20 hidden group-hover/status:block min-w-[160px]">
+                                                            <div className="bg-black border border-white/10 rounded-lg overflow-hidden shadow-xl p-1 space-y-1">
+                                                                <div className="px-2 py-1 text-[8px] uppercase text-zinc-600 font-bold border-b border-white/5">Order Flow</div>
+                                                                {["processing", "shipped", "out_for_delivery", "delivered"].map((s) => (
+                                                                    <button
+                                                                        key={s}
+                                                                        onClick={() => initiateStatusUpdate(order.id, s)}
+                                                                        className={`w-full text-left px-3 py-1.5 text-xs uppercase hover:bg-white/10 rounded transition-colors ${order.status === s ? 'text-blue-400 font-bold' : 'text-zinc-400'}`}
+                                                                    >
+                                                                        {s.replace(/_/g, ' ')}
+                                                                    </button>
+                                                                ))}
+                                                                <div className="px-2 py-1 text-[8px] uppercase text-zinc-600 font-bold border-b border-white/5 border-t mt-1">Returns</div>
+                                                                {["return_requested", "return_processing", "returned"].map((s) => (
+                                                                    <button
+                                                                        key={s}
+                                                                        onClick={() => initiateStatusUpdate(order.id, s)}
+                                                                        className="w-full text-left px-3 py-1.5 text-xs uppercase hover:bg-white/10 rounded transition-colors text-zinc-400 hover:text-red-400"
+                                                                    >
+                                                                        {s.replace(/_/g, ' ')}
+                                                                    </button>
+                                                                ))}
+                                                                <div className="px-2 py-1 text-[8px] uppercase text-zinc-600 font-bold border-b border-white/5 border-t mt-1">Danger Zone</div>
                                                                 <button
-                                                                    key={s}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        initiateStatusUpdate(order.id, s);
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-2 text-xs uppercase hover:bg-white/10 transition-colors"
+                                                                    onClick={() => initiateStatusUpdate(order.id, "cancelled")}
+                                                                    className="w-full text-left px-3 py-1.5 text-xs uppercase hover:bg-red-500/20 rounded transition-colors text-red-500"
                                                                 >
-                                                                    {s}
+                                                                    Cancel Order
                                                                 </button>
-                                                            ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* PAYMENT STATUS */}
+                                                    <div className="relative group/paystatus">
+                                                        <button className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest flex items-center gap-1 ${order.payment_status === 'paid' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                            order.payment_method === 'cod' ? 'bg-orange-500/10 text-orange-400' : 'bg-yellow-500/10 text-yellow-400'
+                                                            }`}>
+                                                            {order.payment_method === 'cod' && order.payment_status !== 'paid' ? 'COD (Pending)' : order.payment_status}
+                                                            <ChevronRight className="w-3 h-3 rotate-90 opacity-50" />
+                                                        </button>
+                                                        <div className="absolute top-full left-0 pt-2 z-20 hidden group-hover/paystatus:block min-w-[140px]">
+                                                            <div className="bg-black border border-white/10 rounded-lg overflow-hidden shadow-xl p-1">
+                                                                {["pending", "paid", "refunded"].map((s) => (
+                                                                    <button
+                                                                        key={s}
+                                                                        onClick={() => updateOrderPaymentStatus(order.id, s)}
+                                                                        className={`w-full text-left px-3 py-1.5 text-xs uppercase hover:bg-white/10 rounded transition-colors ${order.payment_status === s ? 'text-blue-400' : 'text-zinc-400'}`}
+                                                                    >
+                                                                        {s}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
