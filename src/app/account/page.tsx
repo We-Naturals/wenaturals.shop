@@ -164,7 +164,8 @@ export default function AccountPage() {
                                             {addr.is_default && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold">DEFAULT</span>}
                                             <button
                                                 onClick={() => handleDeleteAddress(addr.id)}
-                                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-colors"
+                                                className="p-2 bg-red-500/10 rounded-lg text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center"
+                                                title="Delete Address"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
