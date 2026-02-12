@@ -209,7 +209,8 @@ export default function CheckoutPage() {
             });
 
             if (!rzpOrderReq.ok) {
-                throw new Error("Failed to initiate payment security.");
+                const errorData = await rzpOrderReq.json();
+                throw new Error(errorData.error || "Failed to initiate payment security.");
             }
 
             const rzpOrder = await rzpOrderReq.json();

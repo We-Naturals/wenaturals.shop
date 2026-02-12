@@ -10,12 +10,17 @@ export const OrderService = {
         const supabase = createClient();
 
         // 2. Prepare items for RPC (mapping to database types)
-        const orderItems = validatedData.items.map(item => ({
-            product_id: item.id,
-            product_name: item.name || "Unknown Product",
-            quantity: item.quantity,
-            price_at_purchase: item.price ? Number(item.price) : 0
-        }));
+        const orderItems = validatedData.items.map(item => {
+            const priceStr = String(item.price || "0");
+            const priceValue = parseFloat(priceStr.replace(/[^0-9.-]+/g, ""));
+
+            return {
+                product_id: item.id,
+                product_name: item.name || "Unknown Product",
+                quantity: item.quantity,
+                price_at_purchase: isNaN(priceValue) ? 0 : priceValue
+            };
+        });
 
         // 3. Call Atomic RPC
         // This handles stock validation, stock decrement, order insertion, and item insertion in ONE transaction.
