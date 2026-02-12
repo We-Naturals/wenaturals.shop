@@ -36,7 +36,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
     const [formData, setFormData] = useState({
         name: "",
         slug: "",
-        category: "",
+        categories: [] as string[],
         price: "0",
         stock: 0,
         description: "",
@@ -62,7 +62,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
                 ...initialData,
                 name: initialData.name || "",
                 slug: initialData.slug || "",
-                category: initialData.category || categories[0] || "",
+                categories: initialData.categories || (initialData.category ? [initialData.category] : []) || [],
                 price: initialData.price || "0",
                 stock: initialData.stock || 0,
                 description: initialData.description || "",
@@ -82,7 +82,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
             setFormData({
                 name: "",
                 slug: "",
-                category: categories[0] || "",
+                categories: [],
                 price: "0",
                 stock: 0,
                 description: "",
@@ -273,17 +273,37 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData, categories
                                                 <InputField label="Cipher Slug" name="slug" value={formData.slug} onChange={handleChange} placeholder="celestial-silk-serum" />
 
                                                 <div className="space-y-3">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Ethereal category</label>
-                                                    <select
-                                                        name="category"
-                                                        value={formData.category}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 px-5 outline-none focus:border-blue-500/50 transition-all text-xs font-bold appearance-none cursor-pointer"
-                                                    >
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Ethereal Categories</label>
+                                                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-2 bg-white/[0.03] border border-white/5 rounded-2xl">
                                                         {categories.map(cat => (
-                                                            <option key={cat} value={cat} className="bg-zinc-900">{cat}</option>
+                                                            <label
+                                                                key={cat}
+                                                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${formData.categories.includes(cat)
+                                                                    ? "bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20"
+                                                                    : "glass border-white/5 hover:border-white/10"
+                                                                    }`}
+                                                            >
+                                                                <div className={`w-4 h-4 rounded flex items-center justify-center transition-all ${formData.categories.includes(cat) ? "bg-blue-500" : "border border-white/20"
+                                                                    }`}>
+                                                                    {formData.categories.includes(cat) && <Plus className="w-2.5 h-2.5 text-white" />}
+                                                                </div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="hidden"
+                                                                    checked={formData.categories.includes(cat)}
+                                                                    onChange={() => {
+                                                                        const current = formData.categories;
+                                                                        if (current.includes(cat)) {
+                                                                            setFormData(prev => ({ ...prev, categories: current.filter(c => c !== cat) }));
+                                                                        } else {
+                                                                            setFormData(prev => ({ ...prev, categories: [...current, cat] }));
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wide">{cat}</span>
+                                                            </label>
                                                         ))}
-                                                    </select>
+                                                    </div>
                                                 </div>
 
                                                 <div className="space-y-3">

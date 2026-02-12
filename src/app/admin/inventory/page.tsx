@@ -83,7 +83,13 @@ export default function InventoryPage() {
         if (editingCategory) {
             const oldName = editingCategory.name;
             setCategories(prev => prev.map(c => c === oldName ? name : c));
-            setInventory(prev => prev.map(p => p.category === oldName ? { ...p, category: name } : p));
+            setCategories(prev => prev.map(c => c === oldName ? name : c));
+            setInventory(prev => prev.map(p => {
+                const newCategories = p.categories ? p.categories.map((c: string) => c === oldName ? name : c) : [];
+                // Handle legacy category field update as well if it matches
+                const newCategory = p.category === oldName ? name : p.category;
+                return { ...p, category: newCategory, categories: newCategories.length ? newCategories : (p.category === oldName ? [name] : []) };
+            }));
         } else {
             if (!categories.includes(name)) {
                 setCategories(prev => [...prev, name]);
@@ -92,7 +98,7 @@ export default function InventoryPage() {
     };
 
     const handleDeleteCategory = async (name: string) => {
-        const count = inventory.filter(p => p.category === name).length;
+        const count = inventory.filter(p => p.categories?.includes(name) || p.category === name).length;
         if (confirm(`Deleting this category will leave ${count} producs uncategorized. Proceed?`)) {
             // Real deletion logic needed for DB, for now we just UI update but ideally we delete row
             // But category deletion is complex due to FK.
@@ -127,7 +133,7 @@ export default function InventoryPage() {
 
     const filteredInventory = inventory.filter(p =>
         (p.name.toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase())) &&
-        (selectedCategory === "All" || p.category === selectedCategory)
+        (selectedCategory === "All" || p.categories?.includes(selectedCategory) || p.category === selectedCategory)
     );
 
     const filteredCategories = categories.filter(c => c.toLowerCase().includes(search.toLowerCase()));
@@ -254,7 +260,15 @@ export default function InventoryPage() {
                                             </div>
                                             <div className="lg:col-span-2 flex items-center gap-4 lg:gap-0 w-full lg:w-auto text-[10px] font-bold uppercase tracking-widest">
                                                 <span className="lg:hidden text-zinc-500 w-16">Category:</span>
-                                                <span className="glass px-3 py-1 rounded-full border-white/5 text-zinc-300">{item.category}</span>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {item.categories && item.categories.length > 0 ? (
+                                                        item.categories.map((c: string) => (
+                                                            <span key={c} className="glass px-3 py-1 rounded-full border-white/5 text-zinc-300">{c}</span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="glass px-3 py-1 rounded-full border-white/5 text-zinc-300">{item.category || "Uncategorized"}</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="lg:col-span-1 flex items-center gap-4 lg:gap-0 w-full lg:w-auto font-mono text-xs">
                                                 <span className="lg:hidden text-[10px] text-zinc-500 font-bold uppercase tracking-widest w-16">Stock:</span>
@@ -291,8 +305,8 @@ export default function InventoryPage() {
                     >
                         <AnimatePresence mode="popLayout">
                             {filteredCategories.map((cat, i) => {
-                                const prodCount = inventory.filter(p => p.category === cat).length;
-                                const totalVal = inventory.filter(p => p.category === cat).reduce((sum, p) => sum + parseFloat(p.price), 0);
+                                const prodCount = inventory.filter(p => p.categories?.includes(cat) || p.category === cat).length;
+                                const totalVal = inventory.filter(p => p.categories?.includes(cat) || p.category === cat).reduce((sum, p) => sum + parseFloat(p.price), 0);
                                 return (
                                     <motion.div
                                         key={cat}
