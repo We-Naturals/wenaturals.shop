@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Share2, Bookmark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { SiteNavbar as Navbar } from "@/components/layout/SiteNavbar";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 interface BlogPostClientProps {
@@ -81,7 +80,7 @@ export default function BlogPostClient({ blog, relatedProducts }: BlogPostClient
 
     return (
         <main className="min-h-screen bg-mesh pb-20">
-            <Navbar />
+
 
             {/* Hero Section */}
             <div className="relative h-[60vh] md:h-[70vh] w-full pt-20 overflow-hidden">

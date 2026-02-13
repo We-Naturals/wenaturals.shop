@@ -42,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = data?.value?.seo || {};
 
   return {
+    metadataBase: new URL('https://wenaturals.shop'),
     title: {
       template: seo.titleTemplate || "%s | We Naturals",
       default: "We Naturals | Premium E-Commerce",
@@ -107,7 +108,7 @@ export default async function RootLayout({
     "@type": "Organization",
     "name": "We Naturals",
     "url": "https://wenaturals.shop",
-    "logo": "https://wenaturals.shop/logo.png",
+    "logo": "https://wenaturals.shop/we_naturals_logo.png",
     "sameAs": [
       "https://facebook.com/wenaturals",
       "https://instagram.com/wenaturals",

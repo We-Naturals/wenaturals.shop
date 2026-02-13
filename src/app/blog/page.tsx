@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Clock, User, Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { SiteNavbar as Navbar } from "@/components/layout/SiteNavbar";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { createClient } from "@/lib/supabase";
 
@@ -54,8 +53,8 @@ export default function BlogIndex() {
     if (!isHydrated) return null;
 
     return (
-        <main className="min-h-screen bg-mesh pt-24 md:pt-32 pb-20">
-            <Navbar />
+        <main className="min-h-screen bg-mesh pt-0 pb-20">
+
 
             <div className="max-w-7xl mx-auto px-6">
                 <div className="mb-16 text-center">

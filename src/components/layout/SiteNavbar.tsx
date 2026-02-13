@@ -189,6 +189,7 @@ export function SiteNavbar() {
                             }}
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
                             aria-label="Account"
+                            title="My Account"
                         >
                             <User className="w-4 h-4" />
                         </button>
@@ -196,6 +197,7 @@ export function SiteNavbar() {
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
                             onClick={() => setIsSearchOpen(true)}
                             aria-label="Open Search"
+                            title="Search Products"
                         >
                             <Search className="w-4 h-4" />
                         </button>
@@ -207,6 +209,7 @@ export function SiteNavbar() {
                             }}
                             role="button"
                             aria-label="Open Cart"
+                            title="View Cart"
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && toggleCart()}
                         >

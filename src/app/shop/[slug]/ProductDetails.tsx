@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { SiteNavbar as Navbar } from "@/components/layout/SiteNavbar";
-import { Footer } from "@/components/layout/Footer";
-import { CartSidebar } from "@/components/cart/CartSidebar";
 import { ArrowLeft, ShoppingCart, Star, PlayCircle, ExternalLink, Share2, Package } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/hooks/useCart";
@@ -146,7 +143,7 @@ export default function ProductDetails({
 
     return (
         <main className="min-h-screen bg-zinc-50 dark:bg-black transition-colors duration-300 pb-20">
-            <Navbar />
+
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 md:pt-32 pb-16">
                 <button
@@ -566,9 +563,6 @@ export default function ProductDetails({
                     )}
                 </div>
             )}
-
-            <Footer />
-            <CartSidebar />
         </main>
     );
 }

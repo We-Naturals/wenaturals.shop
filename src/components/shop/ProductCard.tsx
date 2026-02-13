@@ -110,7 +110,7 @@ export function ProductCard({
     return (
         <ContentWrapperHelper alchemyConfig={alchemyConfig}>
             <PrefetchLink href={`/shop/${productSlug}`} slug={productSlug} className="block group cursor-pointer">
-                <motion.div
+                <motion.article
                     ref={cardRef}
                     onMouseMove={handleMouseMove}
                     onMouseEnter={() => { setIsSelfHovered(true); onHoverChange?.(true); }}
@@ -240,7 +240,7 @@ export function ProductCard({
                         </div>
                     </SpotlightCard >
 
-                </motion.div >
+                </motion.article >
             </PrefetchLink >
 
             <ExplodedViewModal

@@ -120,7 +120,7 @@ export default async function BlogPostPage({ params }: Props) {
             "name": "We Naturals",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://wenaturals.shop/logo.png"
+                "url": "https://wenaturals.shop/we_naturals_logo.png"
             }
         },
         "description": blog.excerpt

@@ -1,7 +1,4 @@
-import { SiteNavbar as Navbar } from "@/components/layout/SiteNavbar";
 import { ProductGrid } from "@/components/shop/ProductGrid";
-import { Footer } from "@/components/layout/Footer";
-import { CartSidebar } from "@/components/cart/CartSidebar";
 // motions are moved to client components if strictly needed, but here we can keep page server side and wrap motion parts
 // Actually, using framer-motion directly in a Server Component is not allowed. 
 // We need to extract the Hero section to a Client Component or just keep it simple.
@@ -9,8 +6,31 @@ import { CartSidebar } from "@/components/cart/CartSidebar";
 // but the animation needs to be in a client component.
 import { ShopHero } from "../../components/shop/ShopHero";
 import { createClient } from "@/lib/supabase-server";
+import { Metadata } from "next";
 
 export const revalidate = 0; // Disable cache to prevent stale products
+
+export async function generateMetadata(): Promise<Metadata> {
+    const supabase = await createClient();
+    const { data: pageConfig } = await supabase
+        .from('site_config')
+        .select('value')
+        .eq('key', 'content_pages')
+        .single();
+
+    const shopContent = pageConfig?.value?.shop || {
+        title: "The Molecular Shop",
+        description: "Explore our collection of bio-active serums and botanical distillations."
+    };
+
+    return {
+        title: `${shopContent.title} | We Naturals`,
+        description: shopContent.description,
+        alternates: {
+            canonical: '/shop'
+        }
+    };
+}
 
 export default async function ShopPage() {
     const supabase = await createClient();
@@ -54,7 +74,6 @@ export default async function ShopPage() {
 
     return (
         <main className="min-h-screen bg-background pb-20 transition-colors duration-300">
-            <Navbar />
             <ShopHero
                 title={shopContent.title}
                 description={shopContent.description}
@@ -62,8 +81,6 @@ export default async function ShopPage() {
                 media={shopContent.media || []}
             />
             <ProductGrid initialProducts={products} allCategories={categoryList} />
-            <Footer />
-            <CartSidebar />
         </main>
     );
 }
