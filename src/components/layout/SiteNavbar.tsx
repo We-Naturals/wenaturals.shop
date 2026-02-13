@@ -122,7 +122,7 @@ export function SiteNavbar() {
                 )}>
                     <div className="flex items-center gap-2 cursor-pointer relative z-50">
                         <Link href="/">
-                            <div className="relative w-40 md:w-56 h-16 md:h-24 transition-all duration-300">
+                            <div className="relative w-32 md:w-48 h-12 md:h-20 transition-all duration-300">
                                 <Image
                                     src={globalContent?.navbar?.logo_url || "/we_naturals_logo.png"}
                                     alt="We Naturals"
