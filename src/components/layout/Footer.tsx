@@ -117,7 +117,7 @@ export function Footer() {
                 <div className="flex justify-center">
                     <button
                         onClick={scrollToTop}
-                        className="relative w-40 h-12 opacity-80 hover:opacity-100 transition-all duration-500 hover:scale-105 active:scale-95"
+                        className="relative w-96 h-36 opacity-90 hover:opacity-100 transition-all duration-500 hover:scale-105 active:scale-95"
                     >
                         <img
                             src={content?.footer?.logo_url || "/we_naturals_logo.png"}

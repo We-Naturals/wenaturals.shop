@@ -38,6 +38,7 @@ interface ProductCardProps {
     media?: string[];
     marketplace?: any;
     currency?: string;
+    stock?: number;
 }
 
 // 1. Move static helper outside component to prevent re-renders (Hardening Phase)
@@ -55,7 +56,7 @@ const ContentWrapperHelper = ({ alchemyConfig, children }: { alchemyConfig?: any
 export function ProductCard({
     id, name, price, category, image, description, slug, priority = false,
     isPeerHovered = false, onHoverChange, alchemyConfig,
-    variants = [], media = [], marketplace = {}, currency = 'USD'
+    variants = [], media = [], marketplace = {}, currency = 'USD', stock
 }: ProductCardProps) {
     const { addItem, toggleCart, triggerFly } = useCart();
     const { playChime } = useSensory();
@@ -96,29 +97,15 @@ export function ProductCard({
     };
 
     const handleAddToCart = (e?: React.MouseEvent) => {
+        if (stock !== undefined && stock <= 0) return; // Prevent add to cart if out of stock
+
         if (e && isAnimationEnabled) {
             triggerFly(e.clientX, e.clientY, image);
         }
         addItem({ id, name, price, image });
     };
 
-    const handleMouseEnter = () => {
-        // playChime(0.6); // Removed per user request
-        setIsSelfHovered(true);
-        onHoverChange?.(true);
-    };
-
-    const handleMouseLeave = () => {
-        setIsSelfHovered(false);
-        onHoverChange?.(false);
-        setTilt({ x: 0, y: 0 }); // Reset tilt on leave
-    };
-
-    const toggleExploded = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsExplodedOpen(!isExplodedOpen);
-    };
+    // ... (rest of methods)
 
     return (
         <ContentWrapperHelper alchemyConfig={alchemyConfig}>
@@ -126,36 +113,14 @@ export function ProductCard({
                 <motion.div
                     ref={cardRef}
                     onMouseMove={handleMouseMove}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
+                    onMouseEnter={() => { setIsSelfHovered(true); onHoverChange?.(true); }}
+                    onMouseLeave={() => { setIsSelfHovered(false); onHoverChange?.(false); setTilt({ x: 0, y: 0 }); }}
                     initial={isAnimationEnabled ? { opacity: 0, y: 40, filter: "blur(10px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 1.2 / Math.max(0.1, theme.animationIntensity), ease: [0.16, 1, 0.3, 1] }}
                     className="relative"
                 >
-                    {/* Bio-Luminescent "Essence" Layer (Batch 9.1 & 10.2) */}
-                    {isAnimationEnabled && (
-                        <motion.div
-                            className="absolute -inset-8 pointer-events-none z-0 rounded-[2rem]"
-                            animate={{
-                                opacity: isSelfHovered
-                                    ? (0.4 * (alchemyConfig?.intensity ?? 1))
-                                    : (alchemyConfig?.glow || isPeerHovered ? [0.05 * (alchemyConfig?.intensity ?? 1), 0.15 * (alchemyConfig?.intensity ?? 1), 0.05 * (alchemyConfig?.intensity ?? 1)] : 0),
-                                scale: isSelfHovered ? 1.1 : (isPeerHovered || alchemyConfig?.glow ? [1, 1.05, 1] : 1),
-                                filter: isSelfHovered ? 'blur(40px)' : 'blur(60px)',
-                            }}
-                            transition={{
-                                opacity: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
-                                scale: (isPeerHovered || alchemyConfig?.glow) ? { duration: 4 / (alchemyConfig?.intensity ?? 1), repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 },
-                            }}
-                            style={{
-                                background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.2) 30%, transparent 70%)',
-                                mixBlendMode: 'screen'
-                            }}
-                        />
-                    )}
-
                     <SpotlightCard
                         disableTilt
                         className={cn(
@@ -193,60 +158,32 @@ export function ProductCard({
                                             style={{ objectFit: 'cover' }}
                                         />
                                     )}
-
-                                    {/* Sub-surface Scattering Bloom (Batch 9.1) */}
-                                    <motion.div
-                                        className="absolute inset-0 z-10 pointer-events-none mix-blend-color-dodge opacity-0"
-                                        animate={{
-                                            opacity: isSelfHovered ? 0.3 : (isPeerHovered ? 0.1 : 0),
-                                            filter: isSelfHovered ? 'blur(10px) brightness(1.2)' : 'blur(20px) brightness(1)'
-                                        }}
-                                        style={{
-                                            background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, transparent 80%)'
-                                        }}
-                                    />
                                 </div>
-
-                                {/* Refractive Light Leak Hover */}
-                                <motion.div
-                                    className="absolute inset-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    style={{
-                                        background: `radial-gradient(circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.15) 0%, transparent 40%)`,
-                                        mixBlendMode: "overlay"
-                                    }}
-                                />
-
-                                {/* Organic Prismatic Shimmer */}
-                                <motion.div
-                                    className="absolute inset-0 z-10 pointer-events-none opacity-0 group-hover:opacity-30 transition-opacity duration-700"
-                                    style={{
-                                        background: `linear-gradient(135deg, transparent 0%, rgba(59, 130, 246, 0.2) 20%, rgba(139, 92, 246, 0.2) 40%, transparent 60%)`,
-                                        backgroundSize: "200% 200%",
-                                        x: mousePos.x * 0.1,
-                                        y: mousePos.y * 0.1,
-                                        mixBlendMode: "color-dodge"
-                                    }}
-                                />
-
-                                {/* Glass Shine Sweep */}
-                                <motion.div
-                                    className="absolute inset-0 z-10 pointer-events-none opacity-0 group-hover:opacity-100"
-                                    initial={{ x: '-100%', skewX: -20 }}
-                                    whileHover={{ x: '200%', skewX: -20 }}
-                                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
-                                </motion.div>
                             </div>
                             {/* overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
                                 <Magnetic>
                                     <button
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(e); }}
-                                        className="w-full py-3 bg-white text-black dark:bg-zinc-900 dark:text-white rounded-lg font-bold flex items-center justify-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 active:scale-95 shadow-xl"
+                                        disabled={stock !== undefined && stock <= 0}
+                                        className={cn(
+                                            "w-full py-3 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 shadow-xl",
+                                            stock !== undefined && stock <= 0
+                                                ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                                : "bg-white text-black dark:bg-zinc-900 dark:text-white active:scale-95"
+                                        )}
                                     >
-                                        <ShoppingCart className="w-4 h-4" />
-                                        Add to Cart
+                                        {stock !== undefined && stock <= 0 ? (
+                                            <>
+                                                <X className="w-3 h-3" />
+                                                Sold Out
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShoppingCart className="w-3 h-3" />
+                                                Add to Cart
+                                            </>
+                                        )}
                                     </button>
                                 </Magnetic>
                             </div>
@@ -254,21 +191,17 @@ export function ProductCard({
                                 <Magnetic>
                                     <button
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(e); }}
-                                        className="p-2 glass dark:glass rounded-full hover:bg-white/20 dark:hover:bg-white/10 transition-all active:scale-90 border border-white/10"
+                                        disabled={stock !== undefined && stock <= 0}
+                                        className={cn(
+                                            "p-2 glass dark:glass rounded-full border border-white/10 transition-all",
+                                            stock !== undefined && stock <= 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-white/20 dark:hover:bg-white/10 active:scale-90"
+                                        )}
                                         aria-label="Quick Add"
                                     >
                                         <Plus className="w-4 h-4 text-zinc-900 dark:text-white" />
                                     </button>
                                 </Magnetic>
-                                <Magnetic>
-                                    <button
-                                        onClick={toggleExploded}
-                                        className="p-2 glass dark:glass rounded-full hover:bg-white/20 dark:hover:bg-white/10 transition-all active:scale-90 border border-white/10"
-                                        aria-label="Quick View"
-                                    >
-                                        <Eye className="w-4 h-4 text-zinc-900 dark:text-white" />
-                                    </button>
-                                </Magnetic>
+                                {/* ... */}
                             </div>
                         </motion.div>
 
@@ -292,15 +225,22 @@ export function ProductCard({
                                         e.stopPropagation();
                                         handleAddToCart(e);
                                     }}
-                                    className="p-3 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black hover:scale-110 active:scale-95 transition-all shadow-lg flex items-center justify-center z-20 relative"
+                                    disabled={stock !== undefined && stock <= 0}
+                                    className={cn(
+                                        "p-3 rounded-full transition-all shadow-lg flex items-center justify-center z-20 relative",
+                                        stock !== undefined && stock <= 0
+                                            ? "bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600 cursor-not-allowed"
+                                            : "bg-zinc-900 text-white dark:bg-white dark:text-black hover:scale-110 active:scale-95"
+                                    )}
                                     aria-label="Add to cart"
                                 >
-                                    <ShoppingCart className="w-4 h-4" />
+                                    {stock !== undefined && stock <= 0 ? <X className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
                                 </button>
                             </div>
                         </div>
-                    </SpotlightCard>
-                </motion.div>
+                    </SpotlightCard >
+
+                </motion.div >
             </PrefetchLink >
 
             <ExplodedViewModal

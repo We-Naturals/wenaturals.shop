@@ -37,12 +37,12 @@ export function CategorySpotlight(props: { initialContent?: any }) {
             const { data: cats } = await supabase.from('categories').select('name');
 
             // Fetch one product image per category for the background
-            const { data: products } = await supabase.from('products').select('image, categories_col:categories');
+            const { data: products } = await supabase.from('products').select('image, category');
 
             if (cats && products) {
                 const mappedCats = cats.map((cat: any, i: number) => {
                     const prod = products.find((p: any) =>
-                        (p.categories && p.categories.includes(cat.name)) && p.image
+                        p.category === cat.name && p.image
                     );
                     return {
                         title: cat.name,

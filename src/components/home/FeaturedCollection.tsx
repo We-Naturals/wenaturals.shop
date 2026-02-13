@@ -192,6 +192,7 @@ export function FeaturedCollection(props: { initialContent?: any, initialProduct
                                 isPeerHovered={hoveredId !== null && hoveredId !== product.id}
                                 onHoverChange={(isHovered) => setHoveredId(isHovered ? product.id : null)}
                                 alchemyConfig={product.alchemy_config}
+                                stock={product.stock}
                             />
                         ))
                     ) : (

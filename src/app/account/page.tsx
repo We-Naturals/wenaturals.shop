@@ -133,18 +133,17 @@ export default function AccountPage() {
 
             {/* Order Detail Modal / View */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-black/90 backdrop-blur-sm p-4 overflow-y-auto">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="w-full max-w-2xl my-8"
                     >
-                        <GlassCard className="p-6 md:p-8 space-y-8 relative">
+                        <GlassCard className="p-6 md:p-8 space-y-8 relative bg-white/80 dark:bg-black/40 border-zinc-200 dark:border-white/10 shadow-xl">
                             {/* Close Button */}
                             <button
                                 onClick={() => setSelectedOrder(null)}
-                                className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors font-bold text-zinc-400 hover:text-white"
+                                className="absolute top-4 right-4 p-2 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                             >
                                 ✕
                             </button>
@@ -152,13 +151,13 @@ export default function AccountPage() {
                             {/* Header */}
                             <div className="flex justify-between items-start">
                                 <div className="space-y-1">
-                                    <h2 className="text-2xl font-bold">Ritual Details</h2>
+                                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Ritual Details</h2>
                                     <p className="text-zinc-400 font-mono text-xs">#{selectedOrder.id}</p>
                                     <p className="text-zinc-500 text-xs">{new Date(selectedOrder.created_at).toLocaleString()}</p>
                                 </div>
                                 <button
                                     onClick={() => generateInvoicePDF(selectedOrder)}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 transition-colors mr-8"
+                                    className="px-4 py-2 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10 rounded-lg text-xs uppercase tracking-widest flex items-center gap-2 transition-colors mr-8 text-zinc-900 dark:text-white"
                                 >
                                     <Download className="w-4 h-4" />
                                     <span>Download Bill</span>
@@ -180,7 +179,7 @@ export default function AccountPage() {
                                         // Try to find image from joined product data
                                         const productImg = item.product?.media?.[0] || item.product?.image || "/placeholder.jpg";
                                         return (
-                                            <div key={item.id} className="flex gap-4 p-3 bg-white/5 rounded-xl">
+                                            <div key={item.id} className="flex gap-4 p-3 bg-zinc-50 dark:bg-white/5 rounded-xl border border-zinc-100 dark:border-transparent">
                                                 <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-black">
                                                     <Image
                                                         src={productImg}
@@ -201,7 +200,7 @@ export default function AccountPage() {
                             </div>
 
                             {/* Billing Summary */}
-                            <div className="space-y-3 border-t border-white/10 pt-6">
+                            <div className="space-y-3 border-t border-zinc-200 dark:border-white/10 pt-6">
                                 <div className="flex justify-between text-sm text-zinc-400">
                                     <span>Subtotal</span>
                                     <span>₹{selectedOrder.total_amount}</span>
@@ -218,11 +217,11 @@ export default function AccountPage() {
 
                             {/* Delivery Address */}
                             {selectedOrder.shipping_address && (
-                                <div className="bg-white/5 p-4 rounded-xl space-y-1">
+                                <div className="bg-zinc-50 dark:bg-white/5 p-4 rounded-xl space-y-1 border border-zinc-100 dark:border-transparent">
                                     <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-1">Delivering To</p>
-                                    <p className="text-sm font-bold">{selectedOrder.customer_name}</p>
-                                    <p className="text-xs text-zinc-400">{selectedOrder.shipping_address.street}</p>
-                                    <p className="text-xs text-zinc-400">{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.pincode}</p>
+                                    <p className="text-sm font-bold text-zinc-900 dark:text-white">{selectedOrder.customer_name}</p>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{selectedOrder.shipping_address.street}</p>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.pincode}</p>
                                 </div>
                             )}
 
@@ -313,7 +312,7 @@ export default function AccountPage() {
                                                 return (
                                                     <div key={item.id} className="flex justify-between text-sm">
                                                         <div>
-                                                            <p className="font-bold text-white">{displayProductOnly}</p>
+                                                            <p className="font-bold text-zinc-900 dark:text-white">{displayProductOnly}</p>
                                                             <p className="text-xs text-zinc-500">Qty: {item.quantity}</p>
                                                         </div>
                                                         <p className="text-zinc-400">₹{item.price_at_purchase * item.quantity}</p>
@@ -335,7 +334,7 @@ export default function AccountPage() {
                                                 <span>Shipping</span>
                                                 <span>Free</span>
                                             </div>
-                                            <div className="flex justify-between text-sm font-bold text-white pt-1 items-center">
+                                            <div className="flex justify-between text-sm font-bold text-zinc-900 dark:text-white pt-1 items-center">
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] font-normal text-zinc-500 uppercase tracking-widest">Total Essence</span>
                                                     <span className="text-gradient">₹{order.total_amount}</span>

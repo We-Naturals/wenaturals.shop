@@ -129,6 +129,7 @@ function GridContent({ initialProducts, allCategories = [] }: ProductGridProps) 
                                     description={product.description}
                                     priority={index < 8}
                                     alchemyConfig={product.alchemy_config}
+                                    stock={product.stock}
                                 />
                             </motion.div>
                         ))}

@@ -257,7 +257,7 @@ export default function CheckoutPage() {
                         }
 
                         // Success
-                        await finalizeOrder(order);
+                        await finalizeOrder(order, false); // false = don't send email (server handles it)
                     } catch (err: any) {
                         console.error("Payment Verification Failed:", err);
                         alert("Payment successful but verification failed: " + err.message);
@@ -289,12 +289,14 @@ export default function CheckoutPage() {
         }
     };
 
-    const finalizeOrder = async (order: any) => {
-        // Send Confirmation Email
-        try {
-            await sendOrderConfirmation(order);
-        } catch (emailError) {
-            console.error("Email sending failed (non-critical):", emailError);
+    const finalizeOrder = async (order: any, shouldSendEmail: boolean = true) => {
+        // Send Confirmation Email (Only if requested - COD or Fallback)
+        if (shouldSendEmail) {
+            try {
+                await sendOrderConfirmation(order);
+            } catch (emailError) {
+                console.error("Email sending failed (non-critical):", emailError);
+            }
         }
 
         alert("Ritual Complete. Order has been recorded.");

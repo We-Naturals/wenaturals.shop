@@ -3,6 +3,7 @@ export const generateInvoicePDF = async (order: any) => {
     const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     let yPos = 20;
 
@@ -10,21 +11,47 @@ export const generateInvoicePDF = async (order: any) => {
     const primaryColor = [40, 40, 40]; // Dark Grey
     const secondaryColor = [100, 100, 100]; // Light Grey
 
-    // --- LOGO ---
-    try {
-        const logoUrl = "/we_naturals_logo.png";
-        const logoImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+    // Helper to load images
+    const loadImage = (url: string) => {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
             const img = new Image();
-            img.src = logoUrl;
+            img.crossOrigin = "Anonymous";
+            img.src = url;
             img.onload = () => resolve(img);
-            img.onerror = reject;
+            img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
         });
+    };
 
+    // --- IMAGES (Logo & Watermark) ---
+    try {
+        // 1. Watermark (Background)
+        try {
+            const watermarkUrl = "https://res.cloudinary.com/dbfltasjo/image/upload/v1770840963/Untitled_design_3_iy0pih.png";
+            const watermarkImg = await loadImage(watermarkUrl);
+
+            // Save state to handle transparency/opacity
+            doc.saveGraphicsState();
+            doc.setGState(new (doc as any).GState({ opacity: 0.1 })); // 10% opacity for watermark           const wmWidth = 150;
+            const wmWidth = 150;
+            const wmHeight = 150;
+            const wmX = (pageWidth - wmWidth) / 2;
+            const wmY = (pageHeight - wmHeight) / 2;
+
+            doc.addImage(watermarkImg, 'PNG', wmX, wmY, wmWidth, wmHeight);
+            doc.restoreGraphicsState();
+        } catch (e) {
+            console.warn("Watermark failed to load", e);
+        }
+
+        // 2. Logo
+        const logoUrl = "https://res.cloudinary.com/dbfltasjo/image/upload/v1770733974/We_natural_250_x_100_px_nreaal.png";
+        const logoImg = await loadImage(logoUrl);
         // Add logo (x, y, w, h)
-        doc.addImage(logoImg, "PNG", margin, yPos - 5, 40, 15);
+        doc.addImage(logoImg, "PNG", margin, yPos - 10, 50, 20);
+
     } catch (e) {
         console.warn("Logo failed to load", e);
-        // Fallback text if logo fails
+        // Fallback text
         doc.setFont("helvetica", "bold");
         doc.setFontSize(22);
         doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -32,7 +59,6 @@ export const generateInvoicePDF = async (order: any) => {
     }
 
     // --- HEADER INFO ---
-    // Invoice Label & ID
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -43,10 +69,6 @@ export const generateInvoicePDF = async (order: any) => {
     doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
     doc.text(`#${order.id.slice(0, 8).toUpperCase()}`, pageWidth - margin, yPos + 6, { align: "right" });
     doc.text(`Date: ${new Date(order.created_at).toLocaleDateString()}`, pageWidth - margin, yPos + 12, { align: "right" });
-
-    // Add GST Number below Date
-    const GST_NUMBER = "27ABCDE1234F1Z5"; // Placeholder GST
-    doc.text(`GSTIN: ${GST_NUMBER}`, pageWidth - margin, yPos + 18, { align: "right" });
 
     yPos += 30;
 
@@ -67,12 +89,21 @@ export const generateInvoicePDF = async (order: any) => {
     yPos += 6;
     doc.text(order.customer_name || "Valued Customer", margin, yPos);
     yPos += 5;
+
     if (order.shipping_address) {
-        doc.text(order.shipping_address.street || "", margin, yPos);
-        yPos += 5;
-        doc.text(`${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.pincode}`, margin, yPos);
-        yPos += 5;
-        if (order.shipping_address.phone) doc.text(`Phone: ${order.shipping_address.phone}`, margin, yPos);
+        // Handle both object and array/string formats just in case
+        const addr = order.shipping_address;
+        if (typeof addr === 'object') {
+            if (addr.street) {
+                doc.text(addr.street, margin, yPos);
+                yPos += 5;
+            }
+            if (addr.city || addr.state || addr.pincode) {
+                doc.text(`${addr.city || ''}, ${addr.state || ''} ${addr.pincode || ''}`, margin, yPos);
+                yPos += 5;
+            }
+            if (addr.phone) doc.text(`Phone: ${addr.phone}`, margin, yPos);
+        }
     }
 
     yPos += 20;
@@ -102,16 +133,17 @@ export const generateInvoicePDF = async (order: any) => {
 
     order.items.forEach((item: any) => {
         const name = item.product?.name || item.product_name || item.name || "Artifact";
-        const price = item.price_at_purchase;
-        const total = price * item.quantity;
+        const price = Number(item.price_at_purchase || item.price || 0);
+        const quantity = Number(item.quantity || 1);
+        const total = price * quantity;
 
         // Handle long item names
         let splitName = doc.splitTextToSize(name, 90); // Wrap at 90 units
 
         doc.text(splitName, col1 + 5, yPos);
-        doc.text(Number(price).toFixed(2), col2, yPos, { align: "right" });
-        doc.text(String(item.quantity), col3, yPos, { align: "center" });
-        doc.text(Number(total).toFixed(2), col4 - 5, yPos, { align: "right" });
+        doc.text(price.toFixed(2), col2, yPos, { align: "right" });
+        doc.text(String(quantity), col3, yPos, { align: "center" });
+        doc.text(total.toFixed(2), col4 - 5, yPos, { align: "right" });
 
         yPos += (splitName.length * 6) + 4; // Dynamic spacing based on lines
     });

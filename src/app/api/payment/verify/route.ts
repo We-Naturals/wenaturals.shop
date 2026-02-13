@@ -62,6 +62,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Failed to update order status: " + error.message }, { status: 500 });
         }
 
+        // 3. Send Confirmation Email (Server-Side)
+        try {
+            // Fetch full order details with items for email
+            const { data: fullOrder } = await supabase
+                .from('orders')
+                .select('*, items:order_items(*)')
+                .eq('id', order_id)
+                .single();
+
+            if (fullOrder) {
+                const { sendOrderConfirmation } = await import("@/app/actions/email");
+                await sendOrderConfirmation(fullOrder);
+            }
+        } catch (emailErr) {
+            console.error("Failed to send email from verify route:", emailErr);
+            // Non-blocking, return success for the payment
+        }
+
         return NextResponse.json({ success: true, message: "Payment verified and order updated" });
 
     } catch (error: any) {

@@ -80,8 +80,8 @@ export async function updateOrderStatus(orderId: string, newStatus: string, trac
 
     revalidatePath('/admin/orders');
 
-    // 5. Send Email Notification if Shipped
-    if (updateData.status === "shipped") {
+    // 5. Send Email Notification if Shipped or Delivered
+    if (updateData.status === "shipped" || updateData.status === "delivered") {
         try {
             const { data: fullOrder } = await supabase
                 .from('orders')
@@ -94,7 +94,7 @@ export async function updateOrderStatus(orderId: string, newStatus: string, trac
                 await sendOrderStatusUpdate(fullOrder, trackingNumber || "", carrier || "");
             }
         } catch (emailError) {
-            // console.error("Failed to send email", emailError);
+            console.error("Failed to send email", emailError);
         }
     }
 

@@ -2,64 +2,94 @@
 
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use verified domain or default Resend testing domain
+const SENDER_EMAIL = process.env.RESEND_FROM_EMAIL || 'We Naturals <onboarding@resend.dev>';
+const CUSTOMER_CARE_EMAIL = 'customercare.wenaturals.co@gmail.com';
+
+const getResend = () => {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+        console.warn("RESEND_API_KEY is missing. Email notifications will be disabled.");
+        return null;
+    }
+    return new Resend(key);
+};
 
 export async function sendOrderConfirmation(orderData: any) {
     try {
         const { id, customer_email, customer_name, total_amount, items } = orderData;
 
-        // Use a testing email if in development to avoid spamming real people while testing
-        // or just send to the customer. 
-        // Note: Free Resend accounts can only send TO the email registered with Resend.
-        // For this demo, we will try to send to the customer_email, but it might fail if verified domain is missing.
-        // We will default to a 'delivered@resend.dev' if testing, or just try.
+        const resend = getResend();
+        if (!resend) return { success: true, message: "Email disabled (missing key)" };
 
         const { data, error } = await resend.emails.send({
-            from: 'We Naturals <onboarding@resend.dev>', // Use verified domain here in prod
+            from: SENDER_EMAIL,
+            replyTo: CUSTOMER_CARE_EMAIL,
             to: [customer_email],
-            subject: `Order Confirmed #${id.slice(0, 8)}`,
+            subject: `Ritual Confirmed | Order #${id.slice(0, 8).toUpperCase()}`,
+            react: null, // explicit null if using html
             html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #000; color: #fff; padding: 40px; border-radius: 20px;">
-                    <h1 style="text-align: center; color: #60a5fa; letter-spacing: 0.2em; text-transform: uppercase; font-size: 14px; margin-bottom: 40px;">We Naturals</h1>
-                    
-                    <h2 style="font-size: 32px; margin-bottom: 20px; text-align: center;">Ritual Confirmed</h2>
-                    <p style="color: #a1a1aa; text-align: center; line-height: 1.6; margin-bottom: 40px;">
-                        Thank you, ${customer_name}. Your essence is being prepared with intention and care.
-                    </p>
+                <!DOCTYPE html>
+                <html>
+                <body style="margin: 0; padding: 0; background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #222; border-radius: 16px; overflow: hidden; margin-top: 40px; margin-bottom: 40px;">
+                        
+                        <!-- Header -->
+                        <div style="background-color: #000; padding: 30px; text-align: center; border-bottom: 1px solid #222;">
+                            <img src="https://res.cloudinary.com/dbfltasjo/image/upload/v1770733974/We_natural_250_x_100_px_nreaal.png" alt="We Naturals" style="height: 40px; width: auto;" />
+                        </div>
 
-                    <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-                        <h3 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #71717a; margin-bottom: 20px;">Order Summary</h3>
-                        
-                        ${items.map((item: any) => `
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;">
-                                <span>${item.product_name} <span style="color: #71717a;">x${item.quantity}</span></span>
-                                <span>$${item.price_at_purchase}</span>
+                        <!-- Content -->
+                        <div style="padding: 40px;">
+                            <h2 style="color: #fff; font-size: 24px; text-align: center; font-weight: 300; margin-bottom: 10px;">Ritual Confirmed</h2>
+                            <p style="color: #888; text-align: center; font-size: 14px; margin-bottom: 30px;">Order #${id.slice(0, 8).toUpperCase()}</p>
+                            
+                            <p style="color: #ccc; text-align: center; line-height: 1.6; margin-bottom: 40px;">
+                                Thank you, ${customer_name}.<br/>
+                                Your selection of natural essentials has been received and is being prepared with care.
+                            </p>
+
+                            <!-- Order Items -->
+                            <div style="background-color: #111; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                                ${items.map((item: any) => `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222;">
+                                        <div style="flex: 1;">
+                                            <span style="display: block; color: #fff; font-size: 14px;">${item.product_name || item.name || 'Artifact'}</span>
+                                            <span style="display: block; color: #666; font-size: 12px; margin-top: 4px;">Qty: ${item.quantity}</span>
+                                        </div>
+                                        <span style="color: #fff; font-size: 14px;">₹${item.price_at_purchase}</span>
+                                    </div>
+                                `).join('')}
+                                
+                                <div style="display: flex; justify-content: space-between; padding-top: 20px; margin-top: 10px; border-top: 1px solid #333;">
+                                    <span style="color: #888; font-size: 14px;">Total Essence</span>
+                                    <span style="color: #d4af37; font-size: 18px; font-weight: bold;">₹${total_amount}</span>
+                                </div>
                             </div>
-                        `).join('')}
-                        
-                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; padding-top: 20px; display: flex; justify-content: space-between; font-weight: bold; font-size: 18px;">
-                            <span>Total</span>
-                            <span style="background: -webkit-linear-gradient(45deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$${total_amount}</span>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="background-color: #050505; padding: 30px; text-align: center; border-top: 1px solid #222;">
+                            <p style="color: #444; font-size: 12px; margin: 0;">
+                                Nature's Finest Essentials<br/>
+                                © ${new Date().getFullYear()} We Naturals
+                            </p>
                         </div>
                     </div>
-
-                    <p style="text-align: center; font-size: 12px; color: #52525b;">
-                        This email confirms your order #${id}. If you have any questions, reply to this email.
-                    </p>
-                </div>
+                </body>
+                </html>
             `
         });
 
         if (error) {
-            console.error('Resend API Error:', error);
-            // Don't throw, just log. We don't want to break the checkout success page if email fails.
+            console.error('Resend API Error (Order Confirmation):', JSON.stringify(error, null, 2));
             return { success: false, error };
         }
 
-        console.log("Email sent successfully:", data?.id);
+        console.log('Order Confirmation Email Sent:', data);
         return { success: true, data };
     } catch (error) {
-        console.error('Email Exception (Check API Key):', error);
+        console.error('Email Exception (Order Confirmation):', error);
         return { success: false, error };
     }
 }
@@ -67,54 +97,86 @@ export async function sendOrderConfirmation(orderData: any) {
 export async function sendOrderStatusUpdate(orderData: any, trackingNumber?: string, carrier?: string) {
     try {
         const { id, customer_email, customer_name, status } = orderData;
-        // Only sending for 'shipped' for now as per request
-        if (status !== 'shipped' && orderData.status !== 'shipped') return { success: false, reason: "Status not shipped" };
 
-        const trackingHtml = trackingNumber ? `
-            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center;">
-                <p style="text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: #71717a; margin-bottom: 10px;">Tracking Nuumber</p>
-                <p style="font-family: monospace; font-size: 18px; color: #fff; letter-spacing: 0.05em;">${trackingNumber}</p>
-                ${carrier ? `<p style="font-size: 12px; color: #a1a1aa; margin-top: 5px;">via ${carrier}</p>` : ''}
-            </div>
-        ` : '';
+        // Allow both shipped and delivered
+        if (!['shipped', 'delivered'].includes(status)) return { success: false };
+
+        const isDelivered = status === 'delivered';
+        const subject = isDelivered
+            ? `Ritual Completed | Order #${id.slice(0, 8).toUpperCase()}`
+            : `On Its Way | Order #${id.slice(0, 8).toUpperCase()}`;
+
+        const resend = getResend();
+        if (!resend) return { success: true, message: "Email disabled (missing key)" };
 
         const { data, error } = await resend.emails.send({
-            from: 'We Naturals <onboarding@resend.dev>',
+            from: SENDER_EMAIL,
+            replyTo: CUSTOMER_CARE_EMAIL,
             to: [customer_email],
-            subject: `Your Ritual is on its way! Order #${id.slice(0, 8)}`,
+            subject: subject,
+            react: null,
             html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #000; color: #fff; padding: 40px; border-radius: 20px;">
-                    <h1 style="text-align: center; color: #60a5fa; letter-spacing: 0.2em; text-transform: uppercase; font-size: 14px; margin-bottom: 40px;">We Naturals</h1>
-                    
-                    <h2 style="font-size: 32px; margin-bottom: 20px; text-align: center;">Order Shipped</h2>
-                    <p style="color: #a1a1aa; text-align: center; line-height: 1.6; margin-bottom: 40px;">
-                        Good news, ${customer_name}. Your essence has left our sanctuary and is journeying to you.
-                    </p>
+                <!DOCTYPE html>
+                <html>
+                <body style="margin: 0; padding: 0; background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #222; border-radius: 16px; overflow: hidden; margin-top: 40px; margin-bottom: 40px;">
+                        
+                        <!-- Header -->
+                        <div style="background-color: #000; padding: 30px; text-align: center; border-bottom: 1px solid #222;">
+                            <img src="https://res.cloudinary.com/dbfltasjo/image/upload/v1770733974/We_natural_250_x_100_px_nreaal.png" alt="We Naturals" style="height: 40px; width: auto;" />
+                        </div>
 
-                    ${trackingHtml}
+                        <!-- Content -->
+                        <div style="padding: 40px; text-align: center;">
+                            <div style="width: 60px; height: 60px; background-color: #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid #333;">
+                                <span style="font-size: 24px;">${isDelivered ? '✨' : '🚚'}</span>
+                            </div>
 
-                    <div style="text-align: center; margin-bottom: 40px;">
-                        <a href="#" style="background: #fff; color: #000; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">
-                            Track Package
-                        </a>
-                        <p style="font-size: 10px; color: #52525b; margin-top: 10px;">(Tracking link is a placeholder for MVP)</p>
+                            <h2 style="color: #fff; font-size: 24px; font-weight: 300; margin-bottom: 10px;">${isDelivered ? 'Ritual Completed' : 'Order Shipped'}</h2>
+                            <p style="color: #888; font-size: 14px; margin-bottom: 30px;">Order #${id.slice(0, 8).toUpperCase()}</p>
+                            
+                            <p style="color: #ccc; line-height: 1.6; margin-bottom: 40px;">
+                                ${isDelivered ?
+                    `Greetings, ${customer_name}.<br/>Your natural essentials have arrived. Only valid reflections remain.` :
+                    `Good news, ${customer_name}.<br/>Your package has left our sanctuary and is on its way to you.`
+                }
+                            </p>
+
+                            ${!isDelivered && trackingNumber ? `
+                                <div style="background-color: #111; border: 1px solid #222; border-radius: 8px; padding: 20px; margin-bottom: 30px; text-align: left;">
+                                    <p style="color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0;">Tracking Details</p>
+                                    <p style="color: #fff; font-family: monospace; font-size: 16px; margin: 0;">${trackingNumber}</p>
+                                    ${carrier ? `<p style="color: #888; font-size: 12px; margin: 5px 0 0 0;">via ${carrier}</p>` : ''}
+                                </div>
+                            ` : ''}
+
+                            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/account" style="display: inline-block; background-color: #fff; color: #000; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                                ${isDelivered ? 'View Receipt' : 'Track Ritual'}
+                            </a>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="background-color: #050505; padding: 30px; text-align: center; border-top: 1px solid #222;">
+                            <p style="color: #444; font-size: 12px; margin: 0;">
+                                Nature's Finest Essentials<br/>
+                                © ${new Date().getFullYear()} We Naturals
+                            </p>
+                        </div>
                     </div>
-
-                    <p style="text-align: center; font-size: 12px; color: #52525b;">
-                        Order #${id}
-                    </p>
-                </div>
+                </body>
+                </html>
             `
         });
 
         if (error) {
-            console.error('Email Error:', error);
+            console.error('Resend API Error (Status Update):', JSON.stringify(error, null, 2));
             return { success: false, error };
         }
 
+        console.log('Status Update Email Sent:', data);
         return { success: true, data };
     } catch (error) {
-        console.error('Email Exception:', error);
+        console.error('Email Exception (Status Update):', error);
         return { success: false, error };
     }
 }

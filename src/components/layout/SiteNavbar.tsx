@@ -122,7 +122,7 @@ export function SiteNavbar() {
                 )}>
                     <div className="flex items-center gap-2 cursor-pointer relative z-50">
                         <Link href="/">
-                            <div className="relative w-24 md:w-32 h-8 md:h-10 transition-all duration-300">
+                            <div className="relative w-40 md:w-56 h-16 md:h-24 transition-all duration-300">
                                 <Image
                                     src={globalContent?.navbar?.logo_url || "/we_naturals_logo.png"}
                                     alt="We Naturals"
@@ -190,14 +190,14 @@ export function SiteNavbar() {
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
                             aria-label="Account"
                         >
-                            <User className="w-5 h-5" />
+                            <User className="w-4 h-4" />
                         </button>
                         <button
                             className="text-zinc-600 dark:text-zinc-300 hover:text-blue-500 transition-colors"
                             onClick={() => setIsSearchOpen(true)}
                             aria-label="Open Search"
                         >
-                            <Search className="w-5 h-5" />
+                            <Search className="w-4 h-4" />
                         </button>
                         <div
                             className="relative cursor-pointer group p-1 cart-icon-target"
@@ -210,7 +210,7 @@ export function SiteNavbar() {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && toggleCart()}
                         >
-                            <ShoppingCart className="w-5 h-5 text-zinc-600 dark:text-zinc-300 group-hover:text-blue-500 transition-colors" />
+                            <ShoppingCart className="w-4 h-4 text-zinc-600 dark:text-zinc-300 group-hover:text-blue-500 transition-colors" />
                             {isHydrated && itemCount > 0 && (
                                 <motion.span
                                     initial={{ scale: 0 }}
@@ -226,7 +226,7 @@ export function SiteNavbar() {
                             onClick={() => setIsMobileMenuOpen(true)}
                             aria-label="Open Menu"
                         >
-                            <Menu className="w-6 h-6" />
+                            <Menu className="w-5 h-5" />
                         </button>
                     </div>
                 </div>

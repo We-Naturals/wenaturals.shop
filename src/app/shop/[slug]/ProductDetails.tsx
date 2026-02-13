@@ -216,6 +216,7 @@ export default function ProductDetails({
                             )}
 
                             <button
+                                disabled={product.stock <= 0}
                                 onClick={() => {
                                     const cartItem = selectedVariant ? {
                                         id: `${product.id}-${selectedVariant.weight}${selectedVariant.unit}`,
@@ -233,10 +234,24 @@ export default function ProductDetails({
                                     addItem(cartItem);
                                     toggleCart();
                                 }}
-                                className="w-full py-4 bg-zinc-900 text-white dark:bg-white dark:text-black rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                                className={cn(
+                                    "w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2",
+                                    product.stock > 0
+                                        ? "bg-zinc-900 text-white dark:bg-white dark:text-black hover:opacity-90"
+                                        : "bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600 cursor-not-allowed"
+                                )}
                             >
-                                <ShoppingCart className="w-5 h-5" />
-                                Add to Cart
+                                {product.stock > 0 ? (
+                                    <>
+                                        <ShoppingCart className="w-5 h-5" />
+                                        Add to Cart
+                                    </>
+                                ) : (
+                                    <>
+                                        <X className="w-5 h-5" />
+                                        Sold Out
+                                    </>
+                                )}
                             </button>
                         </div>
 
