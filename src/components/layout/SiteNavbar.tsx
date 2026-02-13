@@ -122,7 +122,7 @@ export function SiteNavbar() {
                 )}>
                     <div className="flex items-center gap-2 cursor-pointer relative z-50">
                         <Link href="/">
-                            <div className="relative w-32 md:w-48 h-12 md:h-20 transition-all duration-300">
+                            <div className="relative w-24 md:w-48 h-10 md:h-20 transition-all duration-300">
                                 <Image
                                     src={globalContent?.navbar?.logo_url || "/we_naturals_logo.png"}
                                     alt="We Naturals"
@@ -169,7 +169,7 @@ export function SiteNavbar() {
                         })}
                     </div>
 
-                    <div className="flex items-center gap-3 md:gap-6 relative z-50">
+                    <div className="flex items-center gap-1.5 md:gap-6 relative z-50">
 
                         <ThemeToggle />
                         <button
